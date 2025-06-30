@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<data-extraction-rules>
+    <cloud-backup disableIfNoMatches="true">
+        <include domain="file" path="."/>
+        <exclude domain="file" path="${applicationId}.noindex"/>
+    </cloud-backup>
+
+    <device-transfer-backup disableIfNoMatches="true">
+        <include domain="file" path="."/>
+        <exclude domain="file" path="${applicationId}.noindex"/>
+    </device-transfer-backup>
+</data-extraction-rules>

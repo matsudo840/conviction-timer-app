@@ -9,6 +9,8 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -37,7 +39,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun ConvictionTimerScreen(timerViewModel: TimerViewModel = viewModel()) {
-    var totalRepsInput by remember { mutableStateOf("") }
+    val totalRepsInput by timerViewModel.totalRepsInput.observeAsState("")
     val timerText by timerViewModel.timerText.observeAsState("00:00")
     val currentRep by timerViewModel.currentRep.observeAsState(0)
     val isRunning by timerViewModel.isRunning.observeAsState(false)
@@ -45,19 +47,29 @@ fun ConvictionTimerScreen(timerViewModel: TimerViewModel = viewModel()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .padding(16.dp)
+            .padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        TextField(
-            value = totalRepsInput,
-            onValueChange = { newValue ->
-                totalRepsInput = newValue.filter { it.isDigit() }
-            },
-            label = { Text("Total Repetitions") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Button(onClick = { timerViewModel.decrementTotalReps() }) {
+                Text("-")
+            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Text(
+                text = "Total Reps: ${totalRepsInput.toIntOrNull() ?: 0}",
+                fontSize = 24.sp
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Button(onClick = { timerViewModel.incrementTotalReps() }) {
+                Text("+")
+            }
+        }
         Spacer(modifier = Modifier.height(32.dp))
         Text(
             text = timerText,
@@ -71,8 +83,7 @@ fun ConvictionTimerScreen(timerViewModel: TimerViewModel = viewModel()) {
         )
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
             Button(onClick = {
-                val reps = totalRepsInput.toIntOrNull() ?: 0
-                timerViewModel.startTimer(reps)
+                timerViewModel.startTimer()
             }, enabled = !isRunning) {
                 Text("Start")
             }
