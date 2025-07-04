@@ -1,7 +1,8 @@
 package com.example.convictiontimer
 
 import android.app.Application
-import android.media.MediaPlayer
+import android.media.AudioAttributes
+import android.media.SoundPool
 import android.speech.tts.TextToSpeech
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
@@ -28,8 +29,9 @@ class TimerViewModel(application: Application) : AndroidViewModel(application), 
     val totalRepsInput: LiveData<String> = _totalRepsInput
 
     private var tts: TextToSpeech? = null
-    private var countPlayer: MediaPlayer? = null
-    private var intervalPlayer: MediaPlayer? = null
+    private var soundPool: SoundPool? = null
+    private var countSoundId: Int = 0
+    private var intervalSoundId: Int = 0
     private var timerJob: Job? = null
     private var totalReps: Int = 0
     private var startTime: Long = 0L
@@ -37,8 +39,19 @@ class TimerViewModel(application: Application) : AndroidViewModel(application), 
 
     init {
         tts = TextToSpeech(getApplication(), this)
-        countPlayer = MediaPlayer.create(getApplication(), R.raw.count)
-        intervalPlayer = MediaPlayer.create(getApplication(), R.raw.interval)
+
+        val audioAttributes = AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_MEDIA)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build()
+
+        soundPool = SoundPool.Builder()
+            .setMaxStreams(2)
+            .setAudioAttributes(audioAttributes)
+            .build()
+
+        countSoundId = soundPool!!.load(getApplication(), R.raw.count, 1)
+        intervalSoundId = soundPool!!.load(getApplication(), R.raw.interval, 1)
     }
 
     fun setTotalRepsInput(value: String) {
@@ -84,10 +97,20 @@ class TimerViewModel(application: Application) : AndroidViewModel(application), 
             val totalDuration = totalReps * repetitionDurationSeconds
 
             while (_isRunning.value == true && elapsedSeconds < totalDuration) {
-                // Post UI updates from the background thread
+                // Accurately delay to the start of the current second
+                val targetTime = startTime + (elapsedSeconds * 1000L)
+                val delayMillis = targetTime - System.currentTimeMillis()
+                if (delayMillis > 0) {
+                    delay(delayMillis)
+                }
+
+                // Check if paused during delay
+                if (_isRunning.value == false) break
+
+                // --- All actions for elapsedSeconds happen here ---
+
                 _timerText.postValue(formatTime(elapsedSeconds))
 
-                // Handle Repetition and TTS announcement at the end of a rep
                 val secondInRep = elapsedSeconds % repetitionDurationSeconds
                 if (secondInRep == 0) {
                     if (elapsedSeconds > 0) {
@@ -99,25 +122,23 @@ class TimerViewModel(application: Application) : AndroidViewModel(application), 
                     }
                 }
 
-                // Handle sound pattern playback
                 when (secondInRep) {
                     0, 1, 3, 4 -> playIntervalSound() // . (dot)
                     2, 5 -> playCountSound()   // * (star)
                 }
 
-                // Increment the second counter
+                // Increment for the next loop
                 elapsedSeconds++
-
-                // Accurately delay for 1 second
-                val targetTime = startTime + (elapsedSeconds * 1000L)
-                val delayMillis = targetTime - System.currentTimeMillis()
-                if (delayMillis > 0) {
-                    delay(delayMillis)
-                }
             }
 
-            // Timer finished or was paused
+            // If the timer ran to completion (was not paused)
             if (_isRunning.value == true) {
+                // Wait for the final second to elapse before showing "Done!"
+                val finalTargetTime = startTime + (totalDuration * 1000L)
+                val finalDelay = finalTargetTime - System.currentTimeMillis()
+                if (finalDelay > 0) {
+                    delay(finalDelay)
+                }
                 _isRunning.postValue(false)
                 _timerText.postValue("Done!")
             }
@@ -137,7 +158,6 @@ class TimerViewModel(application: Application) : AndroidViewModel(application), 
         _totalRepsInput.value = ""
         totalReps = 0
         startTime = 0L
-        stopAndResetPlayers()
     }
 
     private fun speakRepetition(rep: Int) {
@@ -146,25 +166,11 @@ class TimerViewModel(application: Application) : AndroidViewModel(application), 
     }
 
     private fun playCountSound() {
-        countPlayer?.seekTo(0)
-        countPlayer?.start()
+        soundPool?.play(countSoundId, 1f, 1f, 0, 0, 1f)
     }
 
     private fun playIntervalSound() {
-        intervalPlayer?.seekTo(0)
-        intervalPlayer?.start()
-    }
-
-    private fun stopAndResetPlayers() {
-        if (countPlayer?.isPlaying == true) {
-            countPlayer?.pause()
-        }
-        countPlayer?.seekTo(0)
-
-        if (intervalPlayer?.isPlaying == true) {
-            intervalPlayer?.pause()
-        }
-        intervalPlayer?.seekTo(0)
+        soundPool?.play(intervalSoundId, 1f, 1f, 0, 0, 1f)
     }
 
     private fun formatTime(seconds: Int): String {
@@ -177,10 +183,9 @@ class TimerViewModel(application: Application) : AndroidViewModel(application), 
         super.onCleared()
         tts?.stop()
         tts?.shutdown()
-        countPlayer?.release()
-        countPlayer = null
-        intervalPlayer?.release()
-        intervalPlayer = null
+        soundPool?.release()
+        soundPool = null
         timerJob?.cancel()
     }
 }
+
