@@ -87,13 +87,15 @@ class TimerViewModel(application: Application) : AndroidViewModel(application), 
                 // Post UI updates from the background thread
                 _timerText.postValue(formatTime(elapsedSeconds))
 
-                // Handle Repetition and TTS announcement at the start of a new rep
+                // Handle Repetition and TTS announcement at the end of a rep
                 val secondInRep = elapsedSeconds % repetitionDurationSeconds
                 if (secondInRep == 0) {
-                    val currentRepNumber = (elapsedSeconds / repetitionDurationSeconds) + 1
-                    if (currentRepNumber <= totalReps) {
-                        _currentRep.postValue(currentRepNumber)
-                        speakRepetition(currentRepNumber)
+                    if (elapsedSeconds > 0) {
+                        val completedRepNumber = elapsedSeconds / repetitionDurationSeconds
+                        if (completedRepNumber <= totalReps) {
+                            _currentRep.postValue(completedRepNumber)
+                            speakRepetition(completedRepNumber)
+                        }
                     }
                 }
 
