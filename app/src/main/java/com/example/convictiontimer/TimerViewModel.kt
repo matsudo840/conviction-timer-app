@@ -142,7 +142,7 @@ class TimerViewModel(application: Application) : AndroidViewModel(application), 
 
     private fun speakRepetition(rep: Int) {
         Log.d("TTS", "Speaking repetition: $rep")
-        tts?.speak("Rep $rep", TextToSpeech.QUEUE_FLUSH, null, "tts_rep_$rep")
+        tts?.speak("$rep", TextToSpeech.QUEUE_FLUSH, null, "tts_rep_$rep")
     }
 
     private fun playCountSound() {
