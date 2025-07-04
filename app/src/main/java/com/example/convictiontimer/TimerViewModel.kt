@@ -109,16 +109,14 @@ class TimerViewModel(application: Application) : AndroidViewModel(application), 
 
                 // --- All actions for elapsedSeconds happen here ---
 
-                _timerText.postValue(formatTime(elapsedSeconds))
+                _timerText.postValue(formatTime(elapsedSeconds + 1))
 
                 val secondInRep = elapsedSeconds % repetitionDurationSeconds
                 if (secondInRep == 0) {
-                    if (elapsedSeconds > 0) {
-                        val completedRepNumber = elapsedSeconds / repetitionDurationSeconds
-                        if (completedRepNumber <= totalReps) {
-                            _currentRep.postValue(completedRepNumber)
-                            speakRepetition(completedRepNumber)
-                        }
+                    val currentRepNumber = (elapsedSeconds / repetitionDurationSeconds) + 1
+                    if (currentRepNumber <= totalReps) {
+                        _currentRep.postValue(currentRepNumber)
+                        speakRepetition(currentRepNumber)
                     }
                 }
 
