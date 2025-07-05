@@ -139,6 +139,7 @@ class TimerViewModel(application: Application) : AndroidViewModel(application), 
                 }
                 _isRunning.postValue(false)
                 _timerText.postValue("Finish!")
+                speakFinish()
             }
         }
     }
@@ -156,6 +157,10 @@ class TimerViewModel(application: Application) : AndroidViewModel(application), 
         _totalRepsInput.value = ""
         totalReps = 0
         startTime = 0L
+    }
+
+    private fun speakFinish() {
+        tts?.speak("Finish!", TextToSpeech.QUEUE_FLUSH, null, "tts_finish")
     }
 
     private fun speakRepetition(rep: Int) {
