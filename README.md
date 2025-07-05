@@ -7,20 +7,22 @@ This is a simple timer application designed to support bodyweight exercises, esp
 ## Key Features
 
 - **Guided Timer with Audio Cues**
-    - The app provides clear audio cues for each phase of an exercise (lowering, holding, and raising your body).
-    - It helps you maintain a consistent rhythm: "Down (2 seconds) → Hold (1 second) → Up (2 seconds) → Rest (1 second)."
+    - The app provides clear audio cues for each phase of an exercise, helping you maintain a consistent 6-second rhythm per repetition.
+    - A distinct sound marks the start and end of each movement phase (e.g., lowering, holding, raising), while a separate sound indicates the transitions.
 
 - **Repetition Counter**
     - The app counts your reps aloud in English ("One," "Two," "Three," etc.), so you can focus on your form without losing track.
 
 - **Simple Repetition Setup**
-    - Easily set your target number of reps for the day with simple buttons.
+    - Easily set your target number of reps for the day with intuitive buttons.
 
 ## How to Use
 
-1.  Open the app and set the total number of repetitions you want to perform.
-2.  Press the "START" button to begin the timer.
-3.  Just follow the audio guide to perform your exercises.
+1.  Open the app and use the `+` and `-` buttons to set the total number of repetitions you want to perform.
+2.  Press the **START** button to begin the timer.
+3.  Follow the audio guide to perform your exercises.
+4.  Use the **PAUSE** button to temporarily stop the timer if needed.
+5.  Press the **RESET** button to clear the current workout and set a new number of reps.
 
 ## For Developers
 
