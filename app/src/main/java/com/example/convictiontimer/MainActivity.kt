@@ -71,7 +71,7 @@ fun ConvictionTimerScreen(timerViewModel: TimerViewModel = viewModel()) {
         )
         Text(
             text = "Rep: $currentRep",
-            fontSize = 30.sp,
+            fontSize = 32.sp,
             modifier = Modifier.padding(bottom = 32.dp)
         )
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
@@ -126,12 +126,12 @@ fun RepsAdjustmentControls(
         ) {
             Text(
                 text = "Total Reps",
-                style = MaterialTheme.typography.titleMedium,
+                fontSize = 18.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
                 text = totalReps.toString(),
-                style = MaterialTheme.typography.displayLarge,
+                fontSize = 26.sp,
             )
         }
 
