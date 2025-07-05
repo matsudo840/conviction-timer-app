@@ -131,14 +131,14 @@ class TimerViewModel(application: Application) : AndroidViewModel(application), 
 
             // If the timer ran to completion (was not paused)
             if (_isRunning.value == true) {
-                // Wait for the final second to elapse before showing "Done!"
+                // Wait for the final second to elapse before showing "Finish!"
                 val finalTargetTime = startTime + (totalDuration * 1000L)
                 val finalDelay = finalTargetTime - System.currentTimeMillis()
                 if (finalDelay > 0) {
                     delay(finalDelay)
                 }
                 _isRunning.postValue(false)
-                _timerText.postValue("Done!")
+                _timerText.postValue("Finish!")
             }
         }
     }
