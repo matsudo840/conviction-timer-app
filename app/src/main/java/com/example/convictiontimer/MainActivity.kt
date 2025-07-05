@@ -4,17 +4,24 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.Button
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedIconButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -47,29 +54,15 @@ fun ConvictionTimerScreen(timerViewModel: TimerViewModel = viewModel()) {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
-            .padding(horizontal = 16.dp),
+            .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Button(onClick = { timerViewModel.decrementTotalReps() }) {
-                Text("-")
-            }
-            Spacer(modifier = Modifier.width(16.dp))
-            Text(
-                text = "Total Reps: ${totalRepsInput.toIntOrNull() ?: 0}",
-                fontSize = 24.sp
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-            Button(onClick = { timerViewModel.incrementTotalReps() }) {
-                Text("+")
-            }
-        }
+        RepsAdjustmentControls(
+            totalReps = totalRepsInput.toIntOrNull() ?: 0,
+            onIncrement = { timerViewModel.incrementTotalReps() },
+            onDecrement = { timerViewModel.decrementTotalReps() }
+        )
         Spacer(modifier = Modifier.height(32.dp))
         Text(
             text = timerText,
@@ -93,6 +86,73 @@ fun ConvictionTimerScreen(timerViewModel: TimerViewModel = viewModel()) {
             Button(onClick = { timerViewModel.resetTimer() }) {
                 Text("Reset")
             }
+        }
+    }
+}
+
+@Composable
+fun RepsAdjustmentControls(
+    totalReps: Int,
+    onIncrement: () -> Unit,
+    onDecrement: () -> Unit
+) {
+    val haptic = LocalHapticFeedback.current
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(24.dp)
+    ) {
+        // 「-」ボタン (アウトライン)
+        OutlinedIconButton(
+            onClick = {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                onDecrement()
+            },
+            modifier = Modifier.size(64.dp),
+            shape = CircleShape,
+            enabled = (totalReps > 0)
+        ) {
+            Icon(
+                Icons.Filled.Remove,
+                contentDescription = "回数を減らす",
+                modifier = Modifier.size(36.dp)
+            )
+        }
+
+        // 現在の回数表示
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.width(120.dp)
+        ) {
+            Text(
+                text = "Total Reps",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = totalReps.toString(),
+                style = MaterialTheme.typography.displayLarge,
+            )
+        }
+
+        // 「+」ボタン (塗りつぶし)
+        FilledIconButton(
+            onClick = {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                onIncrement()
+            },
+            modifier = Modifier.size(64.dp),
+            shape = CircleShape,
+            colors = IconButtonDefaults.filledIconButtonColors(
+                containerColor = MaterialTheme.colorScheme.primary
+            )
+        ) {
+            Icon(
+                Icons.Filled.Add,
+                contentDescription = "回数を増やす",
+                modifier = Modifier.size(36.dp),
+                tint = MaterialTheme.colorScheme.onPrimary
+            )
         }
     }
 }
