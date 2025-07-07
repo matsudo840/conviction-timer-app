@@ -46,7 +46,7 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun ConvictionTimerScreen(timerViewModel: TimerViewModel = viewModel()) {
-    val totalRepsInput by timerViewModel.totalRepsInput.observeAsState("")
+    val totalReps by timerViewModel.totalReps.collectAsState()
     val timerText by timerViewModel.timerText.observeAsState("00:00")
     val currentRep by timerViewModel.currentRep.observeAsState(0)
     val isRunning by timerViewModel.isRunning.observeAsState(false)
@@ -59,7 +59,7 @@ fun ConvictionTimerScreen(timerViewModel: TimerViewModel = viewModel()) {
         verticalArrangement = Arrangement.Center
     ) {
         RepsAdjustmentControls(
-            totalReps = totalRepsInput.toIntOrNull() ?: 0,
+            totalReps = totalReps,
             onIncrement = { timerViewModel.incrementTotalReps() },
             onDecrement = { timerViewModel.decrementTotalReps() }
         )

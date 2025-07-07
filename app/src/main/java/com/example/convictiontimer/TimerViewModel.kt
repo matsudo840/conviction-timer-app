@@ -11,6 +11,10 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -25,15 +29,14 @@ class TimerViewModel(application: Application) : AndroidViewModel(application), 
     private val _isRunning = MutableLiveData(false)
     val isRunning: LiveData<Boolean> = _isRunning
 
-    private val _totalRepsInput = MutableLiveData("")
-    val totalRepsInput: LiveData<String> = _totalRepsInput
+    private val _totalReps = MutableStateFlow(0)
+    val totalReps: StateFlow<Int> = _totalReps.asStateFlow()
 
     private var tts: TextToSpeech? = null
     private var soundPool: SoundPool? = null
     private var countSoundId: Int = 0
     private var intervalSoundId: Int = 0
     private var timerJob: Job? = null
-    private var totalReps: Int = 0
     private var startTime: Long = 0L
     private val repetitionDurationSeconds = 6
 
@@ -54,21 +57,12 @@ class TimerViewModel(application: Application) : AndroidViewModel(application), 
         intervalSoundId = soundPool!!.load(getApplication(), R.raw.interval, 1)
     }
 
-    fun setTotalRepsInput(value: String) {
-        _totalRepsInput.value = value
-        totalReps = value.toIntOrNull() ?: 0
-    }
-
     fun incrementTotalReps() {
-        totalReps++
-        _totalRepsInput.value = totalReps.toString()
+        _totalReps.update { it + 1 }
     }
 
     fun decrementTotalReps() {
-        if (totalReps > 0) {
-            totalReps--
-            _totalRepsInput.value = totalReps.toString()
-        }
+        _totalReps.update { if (it > 0) it - 1 else 0 }
     }
 
     override fun onInit(status: Int) {
@@ -85,7 +79,8 @@ class TimerViewModel(application: Application) : AndroidViewModel(application), 
     }
 
     fun startTimer() {
-        if (_isRunning.value == true || totalReps <= 0) return
+        val currentTotalReps = _totalReps.value
+        if (_isRunning.value == true || currentTotalReps <= 0) return
 
         _isRunning.value = true
         _currentRep.value = 0
@@ -94,7 +89,7 @@ class TimerViewModel(application: Application) : AndroidViewModel(application), 
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
             var elapsedSeconds = 0
-            val totalDuration = totalReps * repetitionDurationSeconds
+            val totalDuration = currentTotalReps * repetitionDurationSeconds
 
             while (_isRunning.value == true && elapsedSeconds < totalDuration) {
                 // Accurately delay to the start of the current second
@@ -114,7 +109,7 @@ class TimerViewModel(application: Application) : AndroidViewModel(application), 
                 val secondInRep = elapsedSeconds % repetitionDurationSeconds
                 if (secondInRep == 0) {
                     val currentRepNumber = (elapsedSeconds / repetitionDurationSeconds) + 1
-                    if (currentRepNumber <= totalReps) {
+                    if (currentRepNumber <= currentTotalReps) {
                         _currentRep.postValue(currentRepNumber)
                         speakRepetition(currentRepNumber)
                     }
@@ -154,8 +149,7 @@ class TimerViewModel(application: Application) : AndroidViewModel(application), 
         _isRunning.value = false
         _timerText.value = "00:00"
         _currentRep.value = 0
-        _totalRepsInput.value = ""
-        totalReps = 0
+        _totalReps.value = 0
         startTime = 0L
     }
 
