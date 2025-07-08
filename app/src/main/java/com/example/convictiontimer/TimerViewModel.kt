@@ -92,49 +92,55 @@ class TimerViewModel(application: Application) : AndroidViewModel(application), 
             val totalDuration = currentTotalReps * repetitionDurationSeconds
 
             while (_isRunning.value == true && elapsedSeconds < totalDuration) {
-                // Accurately delay to the start of the current second
                 val targetTime = startTime + (elapsedSeconds * 1000L)
                 val delayMillis = targetTime - System.currentTimeMillis()
                 if (delayMillis > 0) {
                     delay(delayMillis)
                 }
 
-                // Check if paused during delay
                 if (_isRunning.value == false) break
-
-                // --- All actions for elapsedSeconds happen here ---
 
                 _timerText.postValue(formatTime(elapsedSeconds + 1))
 
                 val secondInRep = elapsedSeconds % repetitionDurationSeconds
-                if (secondInRep == 0) {
-                    val currentRepNumber = (elapsedSeconds / repetitionDurationSeconds) + 1
-                    if (currentRepNumber <= currentTotalReps) {
-                        _currentRep.postValue(currentRepNumber)
-                        speakRepetition(currentRepNumber)
+                
+                // Voice and Rep Count Logic
+                if (secondInRep == 1) { // Actions at 1s, 7s, 13s, etc.
+                    val repCycleIndex = elapsedSeconds / repetitionDurationSeconds // 0, 1, 2...
+                    if (repCycleIndex == 0) {
+                        // This is the first cycle (at elapsedSeconds == 1)
+                        speak("Ready")
+                    } else {
+                        // This is a subsequent rep cycle (at elapsedSeconds == 7, 13, etc.)
+                        val repNumber = repCycleIndex
+                        _currentRep.postValue(repNumber)
+                        speak(repNumber.toString())
                     }
                 }
 
+                // Sound effect logic (remains unchanged)
                 when (secondInRep) {
                     0, 1, 3, 4 -> playIntervalSound() // . (dot)
                     2, 5 -> playCountSound()   // * (star)
                 }
 
-                // Increment for the next loop
                 elapsedSeconds++
             }
 
-            // If the timer ran to completion (was not paused)
+            // Timer completion logic
             if (_isRunning.value == true) {
-                // Wait for the final second to elapse before showing "Finish!"
+                // Wait for the final second to fully elapse
                 val finalTargetTime = startTime + (totalDuration * 1000L)
                 val finalDelay = finalTargetTime - System.currentTimeMillis()
                 if (finalDelay > 0) {
                     delay(finalDelay)
                 }
-                _isRunning.postValue(false)
+
+                // Final state update
+                _currentRep.postValue(currentTotalReps)
                 _timerText.postValue("Finish!")
-                speakFinish()
+                speak("Finish")
+                _isRunning.postValue(false)
             }
         }
     }
@@ -153,13 +159,9 @@ class TimerViewModel(application: Application) : AndroidViewModel(application), 
         startTime = 0L
     }
 
-    private fun speakFinish() {
-        tts?.speak("Finish!", TextToSpeech.QUEUE_FLUSH, null, "tts_finish")
-    }
-
-    private fun speakRepetition(rep: Int) {
-        Log.d("TTS", "Speaking repetition: $rep")
-        tts?.speak("$rep", TextToSpeech.QUEUE_FLUSH, null, "tts_rep_$rep")
+    // A single, simplified speak function
+    private fun speak(text: String) {
+        tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
     }
 
     private fun playCountSound() {
@@ -185,4 +187,3 @@ class TimerViewModel(application: Application) : AndroidViewModel(application), 
         timerJob?.cancel()
     }
 }
-
