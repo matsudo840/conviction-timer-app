@@ -103,16 +103,17 @@ class TimerViewModel(application: Application) : AndroidViewModel(application), 
                 _timerText.postValue(formatTime(elapsedSeconds + 1))
 
                 val secondInRep = elapsedSeconds % repetitionDurationSeconds
-                
+
                 // Voice and Rep Count Logic
-                if (secondInRep == 1) { // Actions at 1s, 7s, 13s, etc.
+                if (secondInRep == 0) { // Actions at 0s, 6s, 12s, etc.
                     val repCycleIndex = elapsedSeconds / repetitionDurationSeconds // 0, 1, 2...
+
                     if (repCycleIndex == 0) {
-                        // This is the first cycle (at elapsedSeconds == 1)
+                        // First rep cycle (starts at 0s), rep count is 0
                         speak("Ready")
                     } else {
-                        // This is a subsequent rep cycle (at elapsedSeconds == 7, 13, etc.)
-                        val repNumber = repCycleIndex
+                        // Subsequent rep cycles (e.g., at 6s, repCycleIndex is 1)
+                        val repNumber = repCycleIndex // This will be 1, 2, 3...
                         _currentRep.postValue(repNumber)
                         speak(repNumber.toString())
                     }
