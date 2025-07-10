@@ -89,7 +89,7 @@ class TimerViewModel(application: Application) : AndroidViewModel(application), 
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
             var elapsedSeconds = 0
-            val totalDuration = currentTotalReps * repetitionDurationSeconds
+            val totalDuration = (currentTotalReps + 1) * repetitionDurationSeconds
 
             while (_isRunning.value == true && elapsedSeconds < totalDuration) {
                 val targetTime = startTime + (elapsedSeconds * 1000L)
