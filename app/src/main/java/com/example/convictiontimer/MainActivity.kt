@@ -3,10 +3,12 @@ package com.example.convictiontimer
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -15,6 +17,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -37,6 +40,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ConvictionTimerScreen(timerViewModel: TimerViewModel = viewModel()) {
     val totalReps by timerViewModel.totalReps.collectAsState()
@@ -44,48 +48,62 @@ fun ConvictionTimerScreen(timerViewModel: TimerViewModel = viewModel()) {
     val currentRep by timerViewModel.currentRep.observeAsState(0)
     val isRunning by timerViewModel.isRunning.observeAsState(false)
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        ExerciseSelection(timerViewModel = timerViewModel)
-        Spacer(modifier = Modifier.height(32.dp))
-        RepsAdjustmentControls(
-            totalReps = totalReps,
-            onIncrement = { timerViewModel.incrementTotalReps() },
-            onDecrement = { timerViewModel.decrementTotalReps() }
-        )
-        Spacer(modifier = Modifier.height(32.dp))
-        Text(
-            text = timerText,
-            fontSize = 80.sp,
-            modifier = Modifier.padding(bottom = 16.dp)
-        )
-        Text(
-            text = "Rep: $currentRep",
-            fontSize = 32.sp,
-            modifier = Modifier.padding(bottom = 32.dp)
-        )
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-            Button(onClick = {
-                timerViewModel.startTimer()
-            }, enabled = !isRunning) {
-                Text("Start")
-            }
-            Button(onClick = { timerViewModel.pauseTimer() }, enabled = isRunning) {
-                Text("Pause")
-            }
-            Button(onClick = { timerViewModel.resetTimer() }) {
-                Text("Reset")
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text("Conviction Timer") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            )
+        }
+    ) { paddingValues ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            ExerciseSelectionCard(timerViewModel = timerViewModel)
+
+            TimerDisplay(timerText = timerText, currentRep = currentRep)
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                RepsAdjustmentControls(
+                    totalReps = totalReps,
+                    onIncrement = { timerViewModel.incrementTotalReps() },
+                    onDecrement = { timerViewModel.decrementTotalReps() }
+                )
+                TimerControls(
+                    isRunning = isRunning,
+                    onStart = { timerViewModel.startTimer() },
+                    onPause = { timerViewModel.pauseTimer() },
+                    onReset = { timerViewModel.resetTimer() }
+                )
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ExerciseSelectionCard(timerViewModel: TimerViewModel) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            ExerciseSelection(timerViewModel = timerViewModel)
+        }
+    }
+}
+
+
 @Composable
 fun ExerciseSelection(timerViewModel: TimerViewModel) {
     val categories by timerViewModel.categories.collectAsState()
@@ -99,71 +117,32 @@ fun ExerciseSelection(timerViewModel: TimerViewModel) {
     val levels by timerViewModel.levels.collectAsState()
     val selectedLevel by timerViewModel.selectedLevel.collectAsState()
 
-    var categoryExpanded by remember { mutableStateOf(false) }
-    var stepExpanded by remember { mutableStateOf(false) }
-    var levelExpanded by remember { mutableStateOf(false) }
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Dropdown(
+            label = "Category",
+            selectedValue = selectedCategory,
+            options = categories,
+            onSelected = { timerViewModel.onCategorySelected(it) },
+            enabled = true
+        )
 
-    Column {
-        ExposedDropdownMenuBox(
-            expanded = categoryExpanded,
-            onExpandedChange = { categoryExpanded = !categoryExpanded }
-        ) {
-            TextField(
-                value = selectedCategory,
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Category") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
-                modifier = Modifier.menuAnchor().fillMaxWidth()
+        if (steps.isNotEmpty()) {
+            Text(
+                text = "Step",
+                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
             )
-            ExposedDropdownMenu(
-                expanded = categoryExpanded,
-                onDismissRequest = { categoryExpanded = false }
-            ) {
-                categories.forEach { category ->
-                    DropdownMenuItem(
-                        text = { Text(category) },
-                        onClick = {
-                            timerViewModel.onCategorySelected(category)
-                            categoryExpanded = false
-                        }
+            val selectedTabIndex = steps.indexOf(selectedStep).coerceAtLeast(0)
+            ScrollableTabRow(selectedTabIndex = selectedTabIndex) {
+                steps.forEachIndexed { index, step ->
+                    Tab(
+                        selected = selectedTabIndex == index,
+                        onClick = { timerViewModel.onStepSelected(step) },
+                        text = { Text(step) }
                     )
                 }
             }
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        ExposedDropdownMenuBox(
-            expanded = stepExpanded,
-            onExpandedChange = { stepExpanded = !stepExpanded }
-        ) {
-            TextField(
-                value = selectedStep,
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Step") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = stepExpanded) },
-                modifier = Modifier.menuAnchor().fillMaxWidth(),
-                enabled = selectedCategory.isNotEmpty()
-            )
-            ExposedDropdownMenu(
-                expanded = stepExpanded,
-                onDismissRequest = { stepExpanded = false }
-            ) {
-                steps.forEach { step ->
-                    DropdownMenuItem(
-                        text = { Text(step) },
-                        onClick = {
-                            timerViewModel.onStepSelected(step)
-                            stepExpanded = false
-                        }
-                    )
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
 
         if (selectedExercise.isNotEmpty()) {
             Text(
@@ -173,36 +152,87 @@ fun ExerciseSelection(timerViewModel: TimerViewModel) {
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        ExposedDropdownMenuBox(
-            expanded = levelExpanded,
-            onExpandedChange = { levelExpanded = !levelExpanded }
-        ) {
-            TextField(
-                value = selectedLevel,
-                onValueChange = {},
-                readOnly = true,
-                label = { Text("Level") },
-                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = levelExpanded) },
-                modifier = Modifier.menuAnchor().fillMaxWidth(),
-                enabled = selectedExercise.isNotEmpty()
+        if (levels.isNotEmpty()) {
+            Text(
+                text = "Level",
+                style = MaterialTheme.typography.labelSmall,
+                modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
             )
-            ExposedDropdownMenu(
-                expanded = levelExpanded,
-                onDismissRequest = { levelExpanded = false }
-            ) {
-                levels.forEach { level ->
-                    DropdownMenuItem(
-                        text = { Text(level) },
-                        onClick = {
-                            timerViewModel.onLevelSelected(level)
-                            levelExpanded = false
-                        }
+            val selectedTabIndex = levels.indexOf(selectedLevel).coerceAtLeast(0)
+            ScrollableTabRow(selectedTabIndex = selectedTabIndex) {
+                levels.forEachIndexed { index, level ->
+                    Tab(
+                        selected = selectedTabIndex == index,
+                        onClick = { timerViewModel.onLevelSelected(level) },
+                        text = { Text(level) }
                     )
                 }
             }
         }
+    }
+}
+
+@Composable
+fun Dropdown(
+    label: String,
+    selectedValue: String,
+    options: List<String>,
+    onSelected: (String) -> Unit,
+    enabled: Boolean
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Box {
+        OutlinedTextField(
+            value = selectedValue,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(label) },
+            trailingIcon = {
+                Icon(
+                    Icons.Filled.ArrowDropDown,
+                    contentDescription = "Dropdown",
+                    Modifier.clickable(enabled) { expanded = true }
+                )
+            },
+            modifier = Modifier.fillMaxWidth(),
+            enabled = enabled
+        )
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            options.forEach { option ->
+                DropdownMenuItem(
+                    text = { Text(option) },
+                    onClick = {
+                        onSelected(option)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun TimerDisplay(timerText: String, currentRep: Int) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.padding(vertical = 32.dp)
+    ) {
+        Text(
+            text = timerText,
+            fontSize = 80.sp,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
+        )
+        Text(
+            text = "Rep: $currentRep",
+            fontSize = 32.sp,
+            color = MaterialTheme.colorScheme.secondary
+        )
     }
 }
 
@@ -240,12 +270,13 @@ fun RepsAdjustmentControls(
         ) {
             Text(
                 text = "Total Reps",
-                fontSize = 18.sp,
+                style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Text(
                 text = totalReps.toString(),
-                fontSize = 26.sp,
+                style = MaterialTheme.typography.headlineMedium,
+                fontWeight = FontWeight.Bold
             )
         }
 
@@ -269,6 +300,30 @@ fun RepsAdjustmentControls(
         }
     }
 }
+
+@Composable
+fun TimerControls(
+    isRunning: Boolean,
+    onStart: () -> Unit,
+    onPause: () -> Unit,
+    onReset: () -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally)
+    ) {
+        Button(onClick = onStart, enabled = !isRunning, modifier = Modifier.weight(1f)) {
+            Text("Start")
+        }
+        Button(onClick = onPause, enabled = isRunning, modifier = Modifier.weight(1f)) {
+            Text("Pause")
+        }
+        OutlinedButton(onClick = onReset, modifier = Modifier.weight(1f)) {
+            Text("Reset")
+        }
+    }
+}
+
 
 @Preview(showBackground = true)
 @Composable
