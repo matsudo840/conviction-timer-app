@@ -100,7 +100,17 @@ class TimerViewModel(application: Application) : AndroidViewModel(application), 
 
                 if (_isRunning.value == false) break
 
-                _timerText.postValue(formatTime(elapsedSeconds + 1))
+                // Timer display logic
+                if (elapsedSeconds < repetitionDurationSeconds) {
+                    // During the initial "Ready" phase, keep the timer at 00:00
+                    if (elapsedSeconds == 0) {
+                        _timerText.postValue("00:00")
+                    }
+                } else {
+                    // After the "Ready" phase, start counting up.
+                    // elapsedSeconds=6 should be 1, 7 should be 2, etc.
+                    _timerText.postValue(formatTime(elapsedSeconds - repetitionDurationSeconds + 1))
+                }
 
                 val secondInRep = elapsedSeconds % repetitionDurationSeconds
 
