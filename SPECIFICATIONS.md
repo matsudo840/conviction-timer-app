@@ -1,77 +1,78 @@
-# Specifications
+# Application Specifications
 
-This document outlines the detailed specifications for the Conviction Timer application, covering both its user-facing behavior and its internal program logic.
+This document provides a detailed breakdown of the Conviction Timer application's behavior and internal logic.
 
-## Application Specifications
+## 1. User Interface and Controls
 
-This section describes the functional behavior of the app from a user's perspective.
+The user interface is designed for simplicity and ease of use during a workout.
 
-### Timer Sequence
+- **Repetition Display:** Shows the current repetition count.
+- **Timer Display:** Shows the elapsed time in `MM:SS` format.
+- **Total Reps Setting:**
+    - **`+` Button:** Increments the target number of repetitions.
+    - **`-` Button:** Decrements the target number of repetitions.
+- **Action Buttons:**
+    - **`START` Button:** Begins the timer and the workout sequence.
+    - **`PAUSE` Button:** Pauses the timer and audio. Pressing it again resumes the workout.
+    - **`RESET` Button:** Stops the timer, resets the repetition count to 0, and clears the total reps setting.
 
-The timer operates on a 6-second cycle per repetition. The sequence is as follows:
+## 2. Workout Flow
 
-- **Initial State:** The timer displays "00:00" and the rep counter is at "0."
-- **Start:** The user sets the desired number of total reps and presses the START button.
+This section describes the step-by-step user experience.
 
-#### Timing Details:
-- **At 1 second:**
-    - The app audibly says, "Ready."
-- **At 7 seconds:**
-    - The rep counter on the screen updates to "1."
-    - The app audibly says, "One."
-- **At 13 seconds:**
-    - The rep counter on the screen updates to "2."
-    - The app audibly says, "Two."
-- **Subsequent Reps:**
-    - This pattern continues every 6 seconds. For each new rep, the counter increments, and the corresponding number is announced.
-- **Completion:**
-    - Once the total number of reps is reached, the timer stops.
-    - The screen displays the message, "Finish!"
-    - The app audibly says, "Finish."
+1.  **Setup:**
+    - The user opens the app.
+    - The timer displays "00:00" and the rep counter shows "0."
+    - The user sets the desired number of total reps using the `+` and `-` buttons.
 
-### User Controls
+2.  **Starting the Workout:**
+    - The user presses the **START** button.
+    - The timer begins, and a "Ready" voice prompt is played.
 
-- **`+` / `-` Buttons:** Increment or decrement the total number of reps for the workout session.
-- **`START` Button:** Begins the timer sequence.
-- **`PAUSE` Button:** Halts the timer and audio cues. The timer can be resumed from where it left off.
-- **`RESET` Button:** Stops the timer and resets the rep counter and total reps to zero.
+3.  **Performing Repetitions:**
+    - The app guides the user through a 6-second cycle for each repetition, accompanied by audio cues.
+    - At the beginning of each new repetition, the rep counter on the screen updates, and the number is announced aloud (e.g., "One," "Two").
 
-## Program Specifications
+4.  **Pausing and Resuming:**
+    - The user can press the **PAUSE** button at any time to halt the timer and audio.
+    - Pressing the button again (it will now read **RESUME**) continues the workout from where it was paused.
 
-This section details the internal logic and implementation of the timer, primarily managed by the `TimerViewModel`.
+5.  **Completion:**
+    - Once the target number of reps is reached, the timer stops automatically.
+    - The screen displays the message "Finish!"
+    - A "Finish" voice prompt is played.
 
-### Core Components
+6.  **Resetting:**
+    - The user can press the **RESET** button at any time to end the current session and return the app to its initial state.
 
-- **`TimerViewModel.kt`:** A lifecycle-aware ViewModel that holds and manages all timer-related state and logic.
-- **`TextToSpeech` (TTS):** Used for all voice announcements ("Ready," "One," "Two," "Finish").
-- **`SoundPool`:** Manages the playback of short audio cues (beeps and clicks) that mark intervals within each repetition.
+## 3. Timer and Audio Cue Logic
+
+All timing and audio events are managed by the `TimerViewModel`.
+
+### Timer Sequence (6-Second Cycle)
+
+The core of the app is a 6-second timer that dictates the pace of each repetition. Here is the sequence of events, starting from when the user presses **START**:
+
+| Elapsed Time | On-Screen Rep Count | Voice Prompt      | Sound Effect      |
+| :----------- | :------------------ | :---------------- | :---------------- |
+| **1s**       | 0                   | "Ready"           | -                 |
+| **2s**       | 0                   | -                 | Interval Sound    |
+| **4s**       | 0                   | -                 | Interval Sound    |
+| **7s**       | 1                   | "One"             | Rep Count Sound   |
+| **8s**       | 1                   | -                 | Interval Sound    |
+| **10s**      | 1                   | -                 | Interval Sound    |
+| **13s**      | 2                   | "Two"             | Rep Count Sound   |
+| ...          | ...                 | ...               | ...               |
+
+- **Repetition Duration:** Each rep takes exactly **6 seconds**.
+- **Voice Prompts:** Managed by Android's `TextToSpeech` engine.
+- **Sound Effects:** Short beeps (`count.mp3`, `interval.mp3`) are played using `SoundPool` for low-latency audio feedback.
 
 ### State Management
 
-The ViewModel uses `LiveData` and `StateFlow` to expose the following states to the UI:
+The `TimerViewModel` uses `StateFlow` and `LiveData` to expose the following states to the UI, ensuring the interface is always in sync with the timer's logic:
 
-- **`timerText` (`LiveData<String>`):** The formatted time string (e.g., "00:07").
-- **`currentRep` (`LiveData<Int>`):** The current repetition number displayed on the screen.
-- **`isRunning` (`LiveData<Boolean>`):** Indicates whether the timer is currently active.
-- **`totalReps` (`StateFlow<Int>`):** The target number of repetitions for the session.
-
-### Timer Logic (`startTimer` function)
-
-- The core of the timer is a `viewModelScope.launch` coroutine that runs a `while` loop.
-- **`elapsedSeconds`:** A counter that increments every second to track the total time passed.
-- **`repetitionDurationSeconds`:** A constant set to `6` seconds.
-- **Modulus Operator (`%`):** The expression `elapsedSeconds % repetitionDurationSeconds` is used to determine the current position within a 6-second rep cycle.
-
-#### Key Logic Points:
-
-- **Voice and Rep Count Trigger:**
-    - The condition `secondInRep == 1` (where `secondInRep` is the result of the modulus operation) is used to trigger actions at the 1s, 7s, 13s, etc., marks.
-    - At `elapsedSeconds == 1`, the app says "Ready."
-    - For subsequent triggers (`elapsedSeconds == 7`, `13`, etc.), the `repCycleIndex` (`elapsedSeconds / repetitionDurationSeconds`) is calculated to determine the correct rep number. The `currentRep` LiveData is updated, and the number is spoken.
-
-- **Sound Effects:**
-    - The `when (secondInRep)` block plays distinct sounds at different points in the 6-second cycle to help the user maintain a steady rhythm.
-
-- **Completion Handling:**
-    - When the `while` loop finishes (i.e., `elapsedSeconds` reaches `totalDuration`), the timer stops.
-    - The UI is updated to a "Finish!" state, and the final audio cue is played.
+- **`timerText`:** The formatted time string (e.g., "00:07").
+- **`currentRep`:** The current repetition number.
+- **`isRunning`:** A boolean indicating if the timer is active.
+- **`totalReps`:** The target number of repetitions for the session.
