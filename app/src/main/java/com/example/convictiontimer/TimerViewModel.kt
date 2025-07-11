@@ -16,6 +16,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import java.util.Locale
 
 class TimerViewModel(application: Application) : AndroidViewModel(application), TextToSpeech.OnInitListener {
@@ -40,6 +42,33 @@ class TimerViewModel(application: Application) : AndroidViewModel(application), 
     private var startTime: Long = 0L
     private val repetitionDurationSeconds = 6
 
+    private val _exercises = MutableStateFlow<List<Exercise>>(emptyList())
+    val exercises: StateFlow<List<Exercise>> = _exercises.asStateFlow()
+
+    private val _categories = MutableStateFlow<List<String>>(emptyList())
+    val categories: StateFlow<List<String>> = _categories.asStateFlow()
+
+    private val _steps = MutableStateFlow<List<String>>(emptyList())
+    val steps: StateFlow<List<String>> = _steps.asStateFlow()
+
+    private val _exercisesForStep = MutableStateFlow<List<String>>(emptyList())
+    val exercisesForStep: StateFlow<List<String>> = _exercisesForStep.asStateFlow()
+
+    private val _levels = MutableStateFlow<List<String>>(emptyList())
+    val levels: StateFlow<List<String>> = _levels.asStateFlow()
+
+    private val _selectedCategory = MutableStateFlow("")
+    val selectedCategory: StateFlow<String> = _selectedCategory.asStateFlow()
+
+    private val _selectedStep = MutableStateFlow("")
+    val selectedStep: StateFlow<String> = _selectedStep.asStateFlow()
+
+    private val _selectedExercise = MutableStateFlow("")
+    val selectedExercise: StateFlow<String> = _selectedExercise.asStateFlow()
+
+    private val _selectedLevel = MutableStateFlow("")
+    val selectedLevel: StateFlow<String> = _selectedLevel.asStateFlow()
+
     init {
         tts = TextToSpeech(getApplication(), this)
 
@@ -55,6 +84,61 @@ class TimerViewModel(application: Application) : AndroidViewModel(application), 
 
         countSoundId = soundPool!!.load(getApplication(), R.raw.count, 1)
         intervalSoundId = soundPool!!.load(getApplication(), R.raw.interval, 1)
+
+        loadExercises()
+    }
+
+    private fun loadExercises() {
+        viewModelScope.launch {
+            val exerciseList = mutableListOf<Exercise>()
+            val inputStream = getApplication<Application>().resources.openRawResource(R.raw.exercises)
+            val reader = BufferedReader(InputStreamReader(inputStream))
+            reader.readLine() // Skip header
+            var line: String?
+            while (reader.readLine().also { line = it } != null) {
+                val tokens = line!!.split(",")
+                val exercise = Exercise(
+                    category = tokens[0],
+                    step = tokens[1].toInt(),
+                    name = tokens[2],
+                    level = tokens[3],
+                    sets = tokens[4].toInt(),
+                    totalReps = tokens[5].toInt()
+                )
+                exerciseList.add(exercise)
+            }
+            _exercises.value = exerciseList
+            _categories.value = exerciseList.map { it.category }.distinct()
+        }
+    }
+
+    fun onCategorySelected(category: String) {
+        _selectedCategory.value = category
+        _steps.value = _exercises.value.filter { it.category == category }.map { it.step.toString() }.distinct()
+        _selectedStep.value = ""
+        _selectedExercise.value = ""
+        _selectedLevel.value = ""
+    }
+
+    fun onStepSelected(step: String) {
+        _selectedStep.value = step
+        val exercises = _exercises.value.filter { it.category == _selectedCategory.value && it.step.toString() == step }
+        val exerciseName = exercises.firstOrNull()?.name ?: ""
+        _selectedExercise.value = exerciseName
+        _levels.value = exercises.map { it.level }.distinct()
+        _selectedLevel.value = ""
+    }
+
+    fun onExerciseSelected(exercise: String) {
+        _selectedExercise.value = exercise
+        _levels.value = _exercises.value.filter { it.category == _selectedCategory.value && it.step.toString() == _selectedStep.value && it.name == exercise }.map { it.level }.distinct()
+        _selectedLevel.value = ""
+    }
+
+    fun onLevelSelected(level: String) {
+        _selectedLevel.value = level
+        val exercise = _exercises.value.find { it.category == _selectedCategory.value && it.step.toString() == _selectedStep.value && it.name == _selectedExercise.value && it.level == level }
+        _totalReps.value = exercise?.totalReps ?: 0
     }
 
     fun incrementTotalReps() {

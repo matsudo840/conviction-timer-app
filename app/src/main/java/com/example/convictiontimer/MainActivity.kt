@@ -8,14 +8,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material3.Button
-import androidx.compose.material3.FilledIconButton
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedIconButton
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -58,6 +51,8 @@ fun ConvictionTimerScreen(timerViewModel: TimerViewModel = viewModel()) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        ExerciseSelection(timerViewModel = timerViewModel)
+        Spacer(modifier = Modifier.height(32.dp))
         RepsAdjustmentControls(
             totalReps = totalReps,
             onIncrement = { timerViewModel.incrementTotalReps() },
@@ -90,6 +85,127 @@ fun ConvictionTimerScreen(timerViewModel: TimerViewModel = viewModel()) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ExerciseSelection(timerViewModel: TimerViewModel) {
+    val categories by timerViewModel.categories.collectAsState()
+    val selectedCategory by timerViewModel.selectedCategory.collectAsState()
+
+    val steps by timerViewModel.steps.collectAsState()
+    val selectedStep by timerViewModel.selectedStep.collectAsState()
+
+    val selectedExercise by timerViewModel.selectedExercise.collectAsState()
+
+    val levels by timerViewModel.levels.collectAsState()
+    val selectedLevel by timerViewModel.selectedLevel.collectAsState()
+
+    var categoryExpanded by remember { mutableStateOf(false) }
+    var stepExpanded by remember { mutableStateOf(false) }
+    var levelExpanded by remember { mutableStateOf(false) }
+
+    Column {
+        ExposedDropdownMenuBox(
+            expanded = categoryExpanded,
+            onExpandedChange = { categoryExpanded = !categoryExpanded }
+        ) {
+            TextField(
+                value = selectedCategory,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Category") },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = categoryExpanded) },
+                modifier = Modifier.menuAnchor().fillMaxWidth()
+            )
+            ExposedDropdownMenu(
+                expanded = categoryExpanded,
+                onDismissRequest = { categoryExpanded = false }
+            ) {
+                categories.forEach { category ->
+                    DropdownMenuItem(
+                        text = { Text(category) },
+                        onClick = {
+                            timerViewModel.onCategorySelected(category)
+                            categoryExpanded = false
+                        }
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        ExposedDropdownMenuBox(
+            expanded = stepExpanded,
+            onExpandedChange = { stepExpanded = !stepExpanded }
+        ) {
+            TextField(
+                value = selectedStep,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Step") },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = stepExpanded) },
+                modifier = Modifier.menuAnchor().fillMaxWidth(),
+                enabled = selectedCategory.isNotEmpty()
+            )
+            ExposedDropdownMenu(
+                expanded = stepExpanded,
+                onDismissRequest = { stepExpanded = false }
+            ) {
+                steps.forEach { step ->
+                    DropdownMenuItem(
+                        text = { Text(step) },
+                        onClick = {
+                            timerViewModel.onStepSelected(step)
+                            stepExpanded = false
+                        }
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        if (selectedExercise.isNotEmpty()) {
+            Text(
+                text = "Exercise: $selectedExercise",
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        ExposedDropdownMenuBox(
+            expanded = levelExpanded,
+            onExpandedChange = { levelExpanded = !levelExpanded }
+        ) {
+            TextField(
+                value = selectedLevel,
+                onValueChange = {},
+                readOnly = true,
+                label = { Text("Level") },
+                trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = levelExpanded) },
+                modifier = Modifier.menuAnchor().fillMaxWidth(),
+                enabled = selectedExercise.isNotEmpty()
+            )
+            ExposedDropdownMenu(
+                expanded = levelExpanded,
+                onDismissRequest = { levelExpanded = false }
+            ) {
+                levels.forEach { level ->
+                    DropdownMenuItem(
+                        text = { Text(level) },
+                        onClick = {
+                            timerViewModel.onLevelSelected(level)
+                            levelExpanded = false
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
 @Composable
 fun RepsAdjustmentControls(
     totalReps: Int,
@@ -102,7 +218,6 @@ fun RepsAdjustmentControls(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(24.dp)
     ) {
-        // 「-」ボタン (アウトライン)
         OutlinedIconButton(
             onClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -119,7 +234,6 @@ fun RepsAdjustmentControls(
             )
         }
 
-        // 現在の回数表示
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.width(120.dp)
@@ -135,7 +249,6 @@ fun RepsAdjustmentControls(
             )
         }
 
-        // 「+」ボタン (塗りつぶし)
         FilledIconButton(
             onClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)

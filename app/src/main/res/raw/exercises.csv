@@ -1,0 +1,175 @@
+Category,Step,Exercise,Level,Sets,Total Reps
+Push-up,1,Wall Push-up,Beginner,1,10
+Push-up,1,Wall Push-up,Intermediate,2,25
+Push-up,1,Wall Push-up,Advanced,3,50
+Push-up,2,Incline Push-up,Beginner,1,10
+Push-up,2,Incline Push-up,Intermediate,2,20
+Push-up,2,Incline Push-up,Advanced,3,40
+Push-up,3,Kneeling Push-up,Beginner,1,8
+Push-up,3,Kneeling Push-up,Intermediate,2,15
+Push-up,3,Kneeling Push-up,Advanced,3,30
+Push-up,4,Half Push-up,Beginner,1,5
+Push-up,4,Half Push-up,Intermediate,2,10
+Push-up,4,Half Push-up,Advanced,3,20
+Push-up,5,Full Push-up,Beginner,1,5
+Push-up,5,Full Push-up,Intermediate,2,10
+Push-up,5,Full Push-up,Advanced,3,15
+Push-up,6,Close Push-up,Beginner,1,3
+Push-up,6,Close Push-up,Intermediate,2,8
+Push-up,6,Close Push-up,Advanced,3,12
+Push-up,7,Uneven Push-up,Beginner,1,2
+Push-up,7,Uneven Push-up,Intermediate,2,5
+Push-up,7,Uneven Push-up,Advanced,3,10
+Push-up,8,Half One-Arm Push-up,Beginner,1,1
+Push-up,8,Half One-Arm Push-up,Intermediate,2,3
+Push-up,8,Half One-Arm Push-up,Advanced,3,6
+Push-up,9,Lever Push-up,Beginner,1,1
+Push-up,9,Lever Push-up,Intermediate,2,2
+Push-up,9,Lever Push-up,Advanced,3,4
+Push-up,10,One-Arm Push-up,Beginner,1,1
+Push-up,10,One-Arm Push-up,Intermediate,2,2
+Push-up,10,One-Arm Push-up,Advanced,3,3
+Squat,1,Shoulderstand Squat,Beginner,1,15
+Squat,1,Shoulderstand Squat,Intermediate,2,30
+Squat,1,Shoulderstand Squat,Advanced,3,60
+Squat,2,Jackknife Squat,Beginner,1,12
+Squat,2,Jackknife Squat,Intermediate,2,25
+Squat,2,Jackknife Squat,Advanced,3,50
+Squat,3,Support Squat,Beginner,1,10
+Squat,3,Support Squat,Intermediate,2,20
+Squat,3,Support Squat,Advanced,3,40
+Squat,4,Half Squat,Beginner,1,8
+Squat,4,Half Squat,Intermediate,2,15
+Squat,4,Half Squat,Advanced,3,30
+Squat,5,Full Squat,Beginner,1,5
+Squat,5,Full Squat,Intermediate,2,10
+Squat,5,Full Squat,Advanced,3,20
+Squat,6,Close Squat,Beginner,1,4
+Squat,6,Close Squat,Intermediate,2,8
+Squat,6,Close Squat,Advanced,3,15
+Squat,7,Uneven Squat,Beginner,1,3
+Squat,7,Uneven Squat,Intermediate,2,6
+Squat,7,Uneven Squat,Advanced,3,12
+Squat,8,Half One-Leg Squat,Beginner,1,2
+Squat,8,Half One-Leg Squat,Intermediate,2,4
+Squat,8,Half One-Leg Squat,Advanced,3,8
+Squat,9,Pistol Squat,Beginner,1,1
+Squat,9,Pistol Squat,Intermediate,2,2
+Squat,9,Pistol Squat,Advanced,3,4
+Squat,10,One-Leg Squat,Beginner,1,1
+Squat,10,One-Leg Squat,Intermediate,2,2
+Squat,10,One-Leg Squat,Advanced,3,3
+Pull-up,1,Horizontal Pull,Beginner,1,8
+Pull-up,1,Horizontal Pull,Intermediate,2,15
+Pull-up,1,Horizontal Pull,Advanced,3,30
+Pull-up,2,Jackknife Pull,Beginner,1,6
+Pull-up,2,Jackknife Pull,Intermediate,2,12
+Pull-up,2,Jackknife Pull,Advanced,3,25
+Pull-up,3,Half Pull-up,Beginner,1,4
+Pull-up,3,Half Pull-up,Intermediate,2,8
+Pull-up,3,Half Pull-up,Advanced,3,15
+Pull-up,4,Full Pull-up,Beginner,1,3
+Pull-up,4,Full Pull-up,Intermediate,2,6
+Pull-up,4,Full Pull-up,Advanced,3,10
+Pull-up,5,Close Pull-up,Beginner,1,2
+Pull-up,5,Close Pull-up,Intermediate,2,5
+Pull-up,5,Close Pull-up,Advanced,3,8
+Pull-up,6,Uneven Pull-up,Beginner,1,1
+Pull-up,6,Uneven Pull-up,Intermediate,2,3
+Pull-up,6,Uneven Pull-up,Advanced,3,6
+Pull-up,7,Half One-Arm Pull-up,Beginner,1,1
+Pull-up,7,Half One-Arm Pull-up,Intermediate,2,2
+Pull-up,7,Half One-Arm Pull-up,Advanced,3,4
+Pull-up,8,Lever Pull-up,Beginner,1,1
+Pull-up,8,Lever Pull-up,Intermediate,2,2
+Pull-up,8,Lever Pull-up,Advanced,3,3
+Pull-up,9,One-Arm Half Pull-up,Beginner,1,1
+Pull-up,9,One-Arm Half Pull-up,Intermediate,2,1
+Pull-up,9,One-Arm Half Pull-up,Advanced,3,2
+Pull-up,10,One-Arm Pull-up,Beginner,1,1
+Pull-up,10,One-Arm Pull-up,Intermediate,2,1
+Pull-up,10,One-Arm Pull-up,Advanced,3,1
+Leg Raise,1,Flat Knee Raise,Beginner,1,12
+Leg Raise,1,Flat Knee Raise,Intermediate,2,25
+Leg Raise,1,Flat Knee Raise,Advanced,3,50
+Leg Raise,2,Flat Leg Raise,Beginner,1,10
+Leg Raise,2,Flat Leg Raise,Intermediate,2,20
+Leg Raise,2,Flat Leg Raise,Advanced,3,40
+Leg Raise,3,Hanging Knee Raise,Beginner,1,8
+Leg Raise,3,Hanging Knee Raise,Intermediate,2,15
+Leg Raise,3,Hanging Knee Raise,Advanced,3,30
+Leg Raise,4,Hanging Leg Raise,Beginner,1,6
+Leg Raise,4,Hanging Leg Raise,Intermediate,2,12
+Leg Raise,4,Hanging Leg Raise,Advanced,3,25
+Leg Raise,5,Close Leg Raise,Beginner,1,5
+Leg Raise,5,Close Leg Raise,Intermediate,2,10
+Leg Raise,5,Close Leg Raise,Advanced,3,20
+Leg Raise,6,Uneven Leg Raise,Beginner,1,4
+Leg Raise,6,Uneven Leg Raise,Intermediate,2,8
+Leg Raise,6,Uneven Leg Raise,Advanced,3,15
+Leg Raise,7,Half One-Leg Raise,Beginner,1,3
+Leg Raise,7,Half One-Leg Raise,Intermediate,2,6
+Leg Raise,7,Half One-Leg Raise,Advanced,3,12
+Leg Raise,8,Lever Leg Raise,Beginner,1,2
+Leg Raise,8,Lever Leg Raise,Intermediate,2,4
+Leg Raise,8,Lever Leg Raise,Advanced,3,8
+Leg Raise,9,One-Leg Half Raise,Beginner,1,1
+Leg Raise,9,One-Leg Half Raise,Intermediate,2,2
+Leg Raise,9,One-Leg Half Raise,Advanced,3,4
+Leg Raise,10,One-Leg Raise,Beginner,1,1
+Leg Raise,10,One-Leg Raise,Intermediate,2,2
+Leg Raise,10,One-Leg Raise,Advanced,3,3
+Bridge,1,Short Bridge,Beginner,1,15
+Bridge,1,Short Bridge,Intermediate,2,30
+Bridge,1,Short Bridge,Advanced,3,60
+Bridge,2,Straight Bridge,Beginner,1,12
+Bridge,2,Straight Bridge,Intermediate,2,25
+Bridge,2,Straight Bridge,Advanced,3,50
+Bridge,3,Lookback Bridge,Beginner,1,10
+Bridge,3,Lookback Bridge,Intermediate,2,20
+Bridge,3,Lookback Bridge,Advanced,3,40
+Bridge,4,Half Bridge,Beginner,1,8
+Bridge,4,Half Bridge,Intermediate,2,15
+Bridge,4,Half Bridge,Advanced,3,30
+Bridge,5,Full Bridge,Beginner,1,5
+Bridge,5,Full Bridge,Intermediate,2,10
+Bridge,5,Full Bridge,Advanced,3,20
+Bridge,6,Close Bridge,Beginner,1,4
+Bridge,6,Close Bridge,Intermediate,2,8
+Bridge,6,Close Bridge,Advanced,3,15
+Bridge,7,Uneven Bridge,Beginner,1,3
+Bridge,7,Uneven Bridge,Intermediate,2,6
+Bridge,7,Uneven Bridge,Advanced,3,12
+Bridge,8,Half One-Arm Bridge,Beginner,1,2
+Bridge,8,Half One-Arm Bridge,Intermediate,2,4
+Bridge,8,Half One-Arm Bridge,Advanced,3,8
+Bridge,9,Lever Bridge,Beginner,1,1
+Bridge,9,Lever Bridge,Intermediate,2,2
+Bridge,9,Lever Bridge,Advanced,3,4
+Bridge,10,One-Arm Bridge,Beginner,1,1
+Bridge,10,One-Arm Bridge,Intermediate,2,2
+Bridge,10,One-Arm Bridge,Advanced,3,3
+Handstand Push-up,3,Half Handstand Push-up,Beginner,1,5
+Handstand Push-up,3,Half Handstand Push-up,Intermediate,2,10
+Handstand Push-up,3,Half Handstand Push-up,Advanced,3,20
+Handstand Push-up,4,Full Handstand Push-up,Beginner,1,3
+Handstand Push-up,4,Full Handstand Push-up,Intermediate,2,6
+Handstand Push-up,4,Full Handstand Push-up,Advanced,3,12
+Handstand Push-up,5,Close Handstand Push-up,Beginner,1,2
+Handstand Push-up,5,Close Handstand Push-up,Intermediate,2,4
+Handstand Push-up,5,Close Handstand Push-up,Advanced,3,8
+Handstand Push-up,6,Uneven Handstand Push-up,Beginner,1,1
+Handstand Push-up,6,Uneven Handstand Push-up,Intermediate,2,2
+Handstand Push-up,6,Uneven Handstand Push-up,Advanced,3,4
+Handstand Push-up,7,Half One-Arm Handstand Push-up,Beginner,1,1
+Handstand Push-up,7,Half One-Arm Handstand Push-up,Intermediate,2,2
+Handstand Push-up,7,Half One-Arm Handstand Push-up,Advanced,3,3
+Handstand Push-up,8,Lever Handstand Push-up,Beginner,1,1
+Handstand Push-up,8,Lever Handstand Push-up,Intermediate,2,1
+Handstand Push-up,8,Lever Handstand Push-up,Advanced,3,2
+Handstand Push-up,9,One-Arm Half Handstand Push-up,Beginner,1,1
+Handstand Push-up,9,One-Arm Half Handstand Push-up,Intermediate,2,1
+Handstand Push-up,9,One-Arm Half Handstand Push-up,Advanced,3,1
+Handstand Push-up,10,One-Arm Handstand Push-up,Beginner,1,1
+Handstand Push-up,10,One-Arm Handstand Push-up,Intermediate,2,1
+Handstand Push-up,10,One-Arm Handstand Push-up,Advanced,3,1
