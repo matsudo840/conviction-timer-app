@@ -75,11 +75,6 @@ fun ConvictionTimerScreen(timerViewModel: TimerViewModel = viewModel()) {
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                RepsAdjustmentControls(
-                    totalReps = totalReps,
-                    onIncrement = { timerViewModel.incrementTotalReps() },
-                    onDecrement = { timerViewModel.decrementTotalReps() }
-                )
                 TimerControls(
                     isRunning = isRunning,
                     onStart = { timerViewModel.startTimer() },
@@ -93,12 +88,20 @@ fun ConvictionTimerScreen(timerViewModel: TimerViewModel = viewModel()) {
 
 @Composable
 fun ExerciseSelectionCard(timerViewModel: TimerViewModel) {
+    val totalReps by timerViewModel.totalReps.collectAsState()
+
     Card(
         modifier = Modifier.fillMaxWidth(),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             ExerciseSelection(timerViewModel = timerViewModel)
+            Spacer(modifier = Modifier.height(16.dp))
+            RepsAdjustmentControls(
+                totalReps = totalReps,
+                onIncrement = { timerViewModel.incrementTotalReps() },
+                onDecrement = { timerViewModel.decrementTotalReps() }
+            )
         }
     }
 }
@@ -246,7 +249,8 @@ fun RepsAdjustmentControls(
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(24.dp)
+        horizontalArrangement = Arrangement.spacedBy(24.dp),
+        modifier = Modifier.fillMaxWidth()
     ) {
         OutlinedIconButton(
             onClick = {
@@ -266,7 +270,7 @@ fun RepsAdjustmentControls(
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.width(120.dp)
+            modifier = Modifier.weight(1f)
         ) {
             Text(
                 text = "Total Reps",

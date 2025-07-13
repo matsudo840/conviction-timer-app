@@ -108,7 +108,33 @@ class TimerViewModel(application: Application) : AndroidViewModel(application), 
                 exerciseList.add(exercise)
             }
             _exercises.value = exerciseList
-            _categories.value = exerciseList.map { it.category }.distinct()
+            val categories = exerciseList.map { it.category }.distinct()
+            _categories.value = categories
+
+            // Auto-select the first item of each category to ensure UI is populated
+            if (categories.isNotEmpty()) {
+                val category = categories.first()
+                _selectedCategory.value = category
+                val steps = exerciseList.filter { it.category == category }.map { it.step.toString() }.distinct()
+                _steps.value = steps
+
+                if (steps.isNotEmpty()) {
+                    val step = steps.first()
+                    _selectedStep.value = step
+                    val exercisesForStep = exerciseList.filter { it.category == category && it.step.toString() == step }
+                    val exerciseName = exercisesForStep.firstOrNull()?.name ?: ""
+                    _selectedExercise.value = exerciseName
+                    val levels = exercisesForStep.map { it.level }.distinct()
+                    _levels.value = levels
+
+                    if (levels.isNotEmpty()) {
+                        val level = levels.first()
+                        _selectedLevel.value = level
+                        val exercise = exerciseList.find { it.category == category && it.step.toString() == step && it.name == exerciseName && it.level == level }
+                        _totalReps.value = exercise?.totalReps ?: 0
+                    }
+                }
+            }
         }
     }
 
