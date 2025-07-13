@@ -16,11 +16,11 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.io.BufferedReader
-import java.io.InputStreamReader
 import java.util.Locale
 
 class TimerViewModel(application: Application) : AndroidViewModel(application), TextToSpeech.OnInitListener {
+
+    private val repository = TimerRepository(application)
 
     private val _timerText = MutableLiveData("00:00")
     val timerText: LiveData<String> = _timerText
@@ -42,9 +42,7 @@ class TimerViewModel(application: Application) : AndroidViewModel(application), 
     private var startTime: Long = 0L
     private val repetitionDurationSeconds = 6
 
-    private val _exercises = MutableStateFlow<List<Exercise>>(emptyList())
-    val exercises: StateFlow<List<Exercise>> = _exercises.asStateFlow()
-
+    // Exercise-related state
     private val _categories = MutableStateFlow<List<String>>(emptyList())
     val categories: StateFlow<List<String>> = _categories.asStateFlow()
 
@@ -85,86 +83,74 @@ class TimerViewModel(application: Application) : AndroidViewModel(application), 
         countSoundId = soundPool!!.load(getApplication(), R.raw.count, 1)
         intervalSoundId = soundPool!!.load(getApplication(), R.raw.interval, 1)
 
-        loadExercises()
+        loadInitialData()
     }
 
-    private fun loadExercises() {
+    private fun loadInitialData() {
         viewModelScope.launch {
-            val exerciseList = mutableListOf<Exercise>()
-            val inputStream = getApplication<Application>().resources.openRawResource(R.raw.exercises)
-            val reader = BufferedReader(InputStreamReader(inputStream))
-            reader.readLine() // Skip header
-            var line: String?
-            while (reader.readLine().also { line = it } != null) {
-                val tokens = line!!.split(",")
-                val exercise = Exercise(
-                    category = tokens[0],
-                    step = tokens[1].toInt(),
-                    name = tokens[2],
-                    level = tokens[3],
-                    sets = tokens[4].toInt(),
-                    totalReps = tokens[5].toInt()
-                )
-                exerciseList.add(exercise)
-            }
-            _exercises.value = exerciseList
-            val categories = exerciseList.map { it.category }.distinct()
+            repository.loadExercises()
+            val categories = repository.getCategories()
             _categories.value = categories
 
-            // Auto-select the first item of each category to ensure UI is populated
+            // Auto-select the first item to ensure UI is populated
             if (categories.isNotEmpty()) {
-                val category = categories.first()
-                _selectedCategory.value = category
-                val steps = exerciseList.filter { it.category == category }.map { it.step.toString() }.distinct()
-                _steps.value = steps
-
-                if (steps.isNotEmpty()) {
-                    val step = steps.first()
-                    _selectedStep.value = step
-                    val exercisesForStep = exerciseList.filter { it.category == category && it.step.toString() == step }
-                    val exerciseName = exercisesForStep.firstOrNull()?.name ?: ""
-                    _selectedExercise.value = exerciseName
-                    val levels = exercisesForStep.map { it.level }.distinct()
-                    _levels.value = levels
-
-                    if (levels.isNotEmpty()) {
-                        val level = levels.first()
-                        _selectedLevel.value = level
-                        val exercise = exerciseList.find { it.category == category && it.step.toString() == step && it.name == exerciseName && it.level == level }
-                        _totalReps.value = exercise?.totalReps ?: 0
-                    }
-                }
+                onCategorySelected(categories.first(), isInitialLoad = true)
             }
         }
     }
 
-    fun onCategorySelected(category: String) {
+    fun onCategorySelected(category: String, isInitialLoad: Boolean = false) {
         _selectedCategory.value = category
-        _steps.value = _exercises.value.filter { it.category == category }.map { it.step.toString() }.distinct()
-        _selectedStep.value = ""
-        _selectedExercise.value = ""
-        _selectedLevel.value = ""
+        val steps = repository.getStepsForCategory(category)
+        _steps.value = steps
+
+        if (steps.isNotEmpty()) {
+            val stepToSelect = if (isInitialLoad) steps.first() else selectedStep.value.ifEmpty { steps.first() }
+            onStepSelected(stepToSelect, isInitialLoad = isInitialLoad)
+        } else {
+            // Handle case where a category has no steps
+            _selectedStep.value = ""
+            _selectedExercise.value = ""
+            _levels.value = emptyList()
+            _selectedLevel.value = ""
+            _totalReps.value = 0
+        }
     }
 
-    fun onStepSelected(step: String) {
+    fun onStepSelected(step: String, isInitialLoad: Boolean = false) {
         _selectedStep.value = step
-        val exercises = _exercises.value.filter { it.category == _selectedCategory.value && it.step.toString() == step }
-        val exerciseName = exercises.firstOrNull()?.name ?: ""
-        _selectedExercise.value = exerciseName
-        _levels.value = exercises.map { it.level }.distinct()
-        _selectedLevel.value = ""
+        val exercisesInStep = repository.getExercisesForStep(_selectedCategory.value, step)
+        val exerciseName = exercisesInStep.firstOrNull()?.name ?: ""
+        _selectedExercise.value = exerciseName // This might be redundant if you only have one exercise per step
+
+        if (exerciseName.isNotEmpty()) {
+            val levels = repository.getLevelsForExercise(_selectedCategory.value, step, exerciseName)
+            _levels.value = levels
+            if (levels.isNotEmpty()) {
+                val levelToSelect = if (isInitialLoad) levels.first() else selectedLevel.value.ifEmpty { levels.first() }
+                onLevelSelected(levelToSelect)
+            }
+        } else {
+            _levels.value = emptyList()
+            _selectedLevel.value = ""
+            _totalReps.value = 0
+        }
     }
 
     fun onExerciseSelected(exercise: String) {
+        // This function might not be needed if the exercise is determined by the step
+        // but we keep it for consistency with the previous structure.
         _selectedExercise.value = exercise
-        _levels.value = _exercises.value.filter { it.category == _selectedCategory.value && it.step.toString() == _selectedStep.value && it.name == exercise }.map { it.level }.distinct()
+        val levels = repository.getLevelsForExercise(_selectedCategory.value, _selectedStep.value, exercise)
+        _levels.value = levels
         _selectedLevel.value = ""
+        _totalReps.value = 0
     }
 
     fun onLevelSelected(level: String) {
         _selectedLevel.value = level
-        val exercise = _exercises.value.find { it.category == _selectedCategory.value && it.step.toString() == _selectedStep.value && it.name == _selectedExercise.value && it.level == level }
-        _totalReps.value = exercise?.totalReps ?: 0
+        val totalReps = repository.getTotalRepsForLevel(_selectedCategory.value, _selectedStep.value, _selectedExercise.value, level)
+        _totalReps.value = totalReps
     }
 
     fun incrementTotalReps() {
