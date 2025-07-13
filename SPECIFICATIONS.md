@@ -6,11 +6,12 @@ This document provides a detailed breakdown of the Conviction Timer application'
 
 The user interface is designed for simplicity and ease of use during a workout.
 
-- **Repetition Display:** Shows the current repetition count.
-- **Timer Display:** Shows the elapsed time in `MM:SS` format.
-- **Total Reps Setting:**
-    - **`+` Button:** Increments the target number of repetitions.
-    - **`-` Button:** Decrements the target number of repetitions.
+- **Exercise Selection Card:** A card at the top of the screen containing all controls for selecting an exercise.
+    - **Category:** A dropdown to select the exercise category.
+    - **Step:** A set of tabs to select the exercise step.
+    - **Level:** A set of tabs to select the exercise level.
+    - **Total Reps:** A display and controls (`+`/`-` buttons) for the target number of repetitions. This is located within the card, below the level selection.
+- **Timer Display:** Shows the elapsed time in `MM:SS` format and the current repetition count.
 - **Action Buttons:**
     - **`START` Button:** Begins the timer and the workout sequence.
     - **`PAUSE` Button:** Pauses the timer and audio. Pressing it again resumes the workout.
@@ -20,12 +21,17 @@ The user interface is designed for simplicity and ease of use during a workout.
 
 This section describes the step-by-step user experience.
 
-1.  **Setup:**
+1.  **Initial State:**
     - The user opens the app.
+    - The app automatically loads the first exercise from `res/raw/exercises.csv`.
+    - The **Category**, **Step**, **Level**, and **Total Reps** are pre-populated with the data from that first exercise.
     - The timer displays "00:00" and the rep counter shows "0."
-    - The user sets the desired number of total reps using the `+` and `-` buttons.
 
-2.  **Starting the Workout:**
+2.  **Setup:**
+    - The user can either proceed with the default exercise or select a different one using the controls in the Exercise Selection Card.
+    - The user can also manually adjust the **Total Reps** using the `+` and `-` buttons.
+
+3.  **Starting the Workout:**
     - The user presses the **START** button.
     - The timer begins, and a "Ready" voice prompt is played.
 
@@ -54,11 +60,12 @@ In addition to manually setting the total reps, the user can select a pre-define
     - This CSV file contains columns for `category`, `step`, `name`, `level`, `sets`, and `totalReps`.
 
 2.  **Selection Process:**
-    - The user selects a **Category** from a list of available options.
-    - Based on the chosen category, a list of **Steps** is presented.
-    - Upon selecting a step, the **Exercise Name** is automatically determined.
-    - The user then selects a **Level** for that exercise.
-    - Once the level is chosen, the **Total Reps** field is automatically populated with the value from the CSV data.
+    - The **Category**, **Step**, and **Level** controls are always visible.
+    - The user selects a **Category** from a dropdown list.
+    - Based on the chosen category, the available **Steps** are updated.
+    - Upon selecting a step, the **Exercise Name** is automatically determined and displayed.
+    - The available **Levels** for that exercise are then shown.
+    - Once the user selects a **Level**, the **Total Reps** field is automatically populated with the value from the CSV data.
 
 ## 4. Timer and Audio Cue Logic
 
