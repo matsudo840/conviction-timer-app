@@ -23,6 +23,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.convictiontimer.ui.theme.ConvictionTimerAppTheme
+import android.app.Application
+import androidx.lifecycle.ViewModelProvider
+import androidx.compose.ui.platform.LocalContext
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -42,8 +45,10 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ConvictionTimerScreen(timerViewModel: TimerViewModel = viewModel()) {
-    val totalReps by timerViewModel.totalReps.collectAsState()
+fun ConvictionTimerScreen(timerViewModel: TimerViewModel = viewModel(factory = TimerViewModelFactory(
+    LocalContext.current.applicationContext as Application,
+    TimerRepository(LocalContext.current.applicationContext as Application)
+))) {
     val timerText by timerViewModel.timerText.observeAsState("00:00")
     val currentRep by timerViewModel.currentRep.observeAsState(0)
     val isRunning by timerViewModel.isRunning.observeAsState(false)

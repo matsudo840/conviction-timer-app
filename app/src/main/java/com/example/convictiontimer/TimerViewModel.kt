@@ -18,9 +18,10 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.Locale
 
-class TimerViewModel(application: Application) : AndroidViewModel(application), TextToSpeech.OnInitListener {
-
-    private val repository = TimerRepository(application)
+class TimerViewModel(
+    application: Application,
+    private val repository: TimerRepository = TimerRepository(application)
+) : AndroidViewModel(application), TextToSpeech.OnInitListener {
 
     private val _timerText = MutableLiveData("00:00")
     val timerText: LiveData<String> = _timerText
