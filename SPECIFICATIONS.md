@@ -45,7 +45,22 @@ This section describes the step-by-step user experience.
 6.  **Resetting:**
     - The user can press the **RESET** button at any time to end the current session and return the app to its initial state.
 
-## 3. Timer and Audio Cue Logic
+## 3. Exercise Selection Flow
+
+In addition to manually setting the total reps, the user can select a pre-defined exercise to automatically set the target repetitions.
+
+1.  **Data Source:**
+    - Exercise data is loaded from the `res/raw/exercises.csv` file included in the application.
+    - This CSV file contains columns for `category`, `step`, `name`, `level`, `sets`, and `totalReps`.
+
+2.  **Selection Process:**
+    - The user selects a **Category** from a list of available options.
+    - Based on the chosen category, a list of **Steps** is presented.
+    - Upon selecting a step, the **Exercise Name** is automatically determined.
+    - The user then selects a **Level** for that exercise.
+    - Once the level is chosen, the **Total Reps** field is automatically populated with the value from the CSV data.
+
+## 4. Timer and Audio Cue Logic
 
 All timing and audio events are managed by the `TimerViewModel`.
 
