@@ -27,8 +27,8 @@ class TimerRepository(private val application: Application) {
                     step = tokens[1].toInt(),
                     name = tokens[2],
                     level = tokens[3],
-                    sets = tokens[4].toInt(),
-                    totalReps = tokens[5].toInt()
+                    sets = tokens[5].toInt(),
+                    totalReps = tokens[4].toInt()
                 )
                 exerciseList.add(exercise)
             }
