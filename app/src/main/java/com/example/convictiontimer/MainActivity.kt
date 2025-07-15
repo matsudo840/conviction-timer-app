@@ -278,7 +278,7 @@ fun RepsAdjustmentControls(
             modifier = Modifier.weight(1f)
         ) {
             Text(
-                text = "Total Reps",
+                text = "Target Reps",
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

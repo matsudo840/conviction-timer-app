@@ -10,12 +10,12 @@ The user interface is designed for simplicity and ease of use during a workout.
     - **Category:** A dropdown to select the exercise category.
     - **Step:** A set of tabs to select the exercise step.
     - **Level:** A set of tabs to select the exercise level.
-    - **Total Reps:** A display and controls (`+`/`-` buttons) for the target number of repetitions. This is located within the card, below the level selection.
+    - **Target Reps:** A display and controls (`+`/`-` buttons) for the target number of repetitions. This is located within the card, below the level selection.
 - **Timer Display:** Shows the elapsed time in `MM:SS` format and the current repetition count.
 - **Action Buttons:**
     - **`START` Button:** Begins the timer and the workout sequence.
     - **`PAUSE` Button:** Pauses the timer and audio. Pressing it again resumes the workout.
-    - **`RESET` Button:** Stops the timer, resets the repetition count to 0, and clears the total reps setting.
+    - **`RESET` Button:** Stops the timer, resets the repetition count to 0, and clears the target reps setting.
 
 ## 2. Workout Flow
 
@@ -24,12 +24,12 @@ This section describes the step-by-step user experience.
 1.  **Initial State:**
     - The user opens the app.
     - The app automatically loads the first exercise from `res/raw/exercises.csv`.
-    - The **Category**, **Step**, **Level**, and **Total Reps** are pre-populated with the data from that first exercise.
+    - The **Category**, **Step**, **Level**, and **Target Reps** are pre-populated with the data from that first exercise.
     - The timer displays "00:00" and the rep counter shows "0."
 
 2.  **Setup:**
     - The user can either proceed with the default exercise or select a different one using the controls in the Exercise Selection Card.
-    - The user can also manually adjust the **Total Reps** using the `+` and `-` buttons.
+    - The user can also manually adjust the **Target Reps** using the `+` and `-` buttons.
 
 3.  **Starting the Workout:**
     - The user presses the **START** button.
@@ -53,11 +53,11 @@ This section describes the step-by-step user experience.
 
 ## 3. Exercise Selection Flow
 
-In addition to manually setting the total reps, the user can select a pre-defined exercise to automatically set the target repetitions.
+In addition to manually setting the target reps, the user can select a pre-defined exercise to automatically set the target repetitions.
 
 1.  **Data Source:**
     - Exercise data is loaded from the `res/raw/exercises.csv` file included in the application.
-    - This CSV file contains columns for `category`, `step`, `name`, `level`, `sets`, and `totalReps`.
+    - This CSV file contains columns for `category`, `step`, `name`, `level`, `sets`, and `targetReps`.
 
 2.  **Selection Process:**
     - The **Category**, **Step**, and **Level** controls are always visible.
@@ -65,7 +65,7 @@ In addition to manually setting the total reps, the user can select a pre-define
     - Based on the chosen category, the available **Steps** are updated.
     - Upon selecting a step, the **Exercise Name** is automatically determined and displayed.
     - The available **Levels** for that exercise are then shown.
-    - Once the user selects a **Level**, the **Total Reps** field is automatically populated with the value from the CSV data.
+    - Once the user selects a **Level**, the **Target Reps** field is automatically populated with the value from the CSV data.
 
 ## 4. Timer and Audio Cue Logic
 
@@ -97,4 +97,4 @@ The `TimerViewModel` uses `StateFlow` and `LiveData` to expose the following sta
 - **`timerText`:** The formatted time string (e.g., "00:07").
 - **`currentRep`:** The current repetition number.
 - **`isRunning`:** A boolean indicating if the timer is active.
-- **`totalReps`:** The target number of repetitions for the session.
+- **`targetReps`:** The target number of repetitions for the session.
