@@ -68,6 +68,9 @@ class TimerViewModel(
     private val _selectedLevel = MutableStateFlow("")
     val selectedLevel: StateFlow<String> = _selectedLevel.asStateFlow()
 
+    // Map to store selected step and level for each category
+    private val _categorySelectionStates = mutableMapOf<String, CategorySelectionState>()
+
     init {
         tts = TextToSpeech(getApplication(), this)
 
