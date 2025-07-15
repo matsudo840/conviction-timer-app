@@ -105,8 +105,10 @@ class TimerViewModel(
         val steps = repository.getStepsForCategory(category)
         _steps.value = steps
 
+        val savedState = _categorySelectionStates[category]
+
         if (steps.isNotEmpty()) {
-            val stepToSelect = if (isInitialLoad) steps.first() else selectedStep.value.ifEmpty { steps.first() }
+            val stepToSelect = savedState?.selectedStep ?: steps.first()
             onStepSelected(stepToSelect, isInitialLoad = isInitialLoad)
         } else {
             // Handle case where a category has no steps
@@ -122,13 +124,14 @@ class TimerViewModel(
         _selectedStep.value = step
         val exercisesInStep = repository.getExercisesForStep(_selectedCategory.value, step)
         val exerciseName = exercisesInStep.firstOrNull()?.name ?: ""
-        _selectedExercise.value = exerciseName // This might be redundant if you only have one exercise per step
+        _selectedExercise.value = exerciseName
 
         if (exerciseName.isNotEmpty()) {
             val levels = repository.getLevelsForExercise(_selectedCategory.value, step, exerciseName)
             _levels.value = levels
+            val savedState = _categorySelectionStates[_selectedCategory.value]
             if (levels.isNotEmpty()) {
-                val levelToSelect = if (isInitialLoad) levels.first() else selectedLevel.value.ifEmpty { levels.first() }
+                val levelToSelect = savedState?.selectedLevel ?: levels.first()
                 onLevelSelected(levelToSelect)
             }
         } else {
@@ -136,22 +139,35 @@ class TimerViewModel(
             _selectedLevel.value = ""
             _totalReps.value = 0
         }
+        // Save the current selection for the category
+        _categorySelectionStates[_selectedCategory.value] = CategorySelectionState(
+            selectedStep = _selectedStep.value,
+            selectedLevel = _selectedLevel.value
+        )
     }
 
     fun onExerciseSelected(exercise: String) {
-        // This function might not be needed if the exercise is determined by the step
-        // but we keep it for consistency with the previous structure.
         _selectedExercise.value = exercise
         val levels = repository.getLevelsForExercise(_selectedCategory.value, _selectedStep.value, exercise)
         _levels.value = levels
         _selectedLevel.value = ""
         _totalReps.value = 0
+        // Save the current selection for the category
+        _categorySelectionStates[_selectedCategory.value] = CategorySelectionState(
+            selectedStep = _selectedStep.value,
+            selectedLevel = _selectedLevel.value
+        )
     }
 
     fun onLevelSelected(level: String) {
         _selectedLevel.value = level
         val totalReps = repository.getTotalRepsForLevel(_selectedCategory.value, _selectedStep.value, _selectedExercise.value, level)
         _totalReps.value = totalReps
+        // Save the current selection for the category
+        _categorySelectionStates[_selectedCategory.value] = CategorySelectionState(
+            selectedStep = _selectedStep.value,
+            selectedLevel = _selectedLevel.value
+        )
     }
 
     fun incrementTotalReps() {
@@ -295,3 +311,8 @@ class TimerViewModel(
         timerJob?.cancel()
     }
 }
+
+data class CategorySelectionState(
+    val selectedStep: String,
+    val selectedLevel: String
+)
