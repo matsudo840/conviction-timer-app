@@ -98,12 +98,12 @@ class TimerViewModel(
 
             // Auto-select the first item to ensure UI is populated
             if (categories.isNotEmpty()) {
-                onCategorySelected(categories.first(), isInitialLoad = true)
+                onCategorySelected(categories.first())
             }
         }
     }
 
-    fun onCategorySelected(category: String, isInitialLoad: Boolean = false) {
+    fun onCategorySelected(category: String) {
         _selectedCategory.value = category
         val steps = repository.getStepsForCategory(category)
         _steps.value = steps
@@ -112,7 +112,7 @@ class TimerViewModel(
 
         if (steps.isNotEmpty()) {
             val stepToSelect = savedState?.selectedStep ?: steps.first()
-            onStepSelected(stepToSelect, isInitialLoad = isInitialLoad)
+            onStepSelected(stepToSelect)
         } else {
             // Handle case where a category has no steps
             _selectedStep.value = ""
@@ -123,7 +123,7 @@ class TimerViewModel(
         }
     }
 
-    fun onStepSelected(step: String, isInitialLoad: Boolean = false) {
+    fun onStepSelected(step: String) {
         _selectedStep.value = step
         val exercisesInStep = repository.getExercisesForStep(_selectedCategory.value, step)
         val exerciseName = exercisesInStep.firstOrNull()?.name ?: ""
