@@ -83,10 +83,9 @@ fun ConvictionTimerScreen(timerViewModel: TimerViewModel = viewModel(factory = T
 
             TimerControls(
                 isRunning = isRunning,
-                onStartPause = {
-                    if (isRunning) timerViewModel.pauseTimer() else timerViewModel.startTimer()
-                },
-                onReset = { timerViewModel.resetTimer() }
+                onStartStop = {
+                    if (isRunning) timerViewModel.stopTimer() else timerViewModel.startTimer()
+                }
             )
 
             // Spacer at the bottom for padding
@@ -304,28 +303,21 @@ fun RepsAdjustmentControls(
 @Composable
 fun TimerControls(
     isRunning: Boolean,
-    onStartPause: () -> Unit,
-    onReset: () -> Unit
+    onStartStop: () -> Unit
 ) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
+        horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        OutlinedButton(
-            onClick = onReset,
-            modifier = Modifier.weight(1f)
-        ) {
-            Text("Reset")
-        }
         Button(
-            onClick = onStartPause,
+            onClick = onStartStop,
             modifier = Modifier
-                .weight(2f)
+                .fillMaxWidth()
                 .height(48.dp)
         ) {
-            val icon = if (isRunning) Icons.Filled.Pause else Icons.Filled.PlayArrow
-            val text = if (isRunning) "Pause" else "Start"
+            val icon = if (isRunning) Icons.Filled.Stop else Icons.Filled.PlayArrow
+            val text = if (isRunning) "Stop" else "Start"
 
             Icon(imageVector = icon, contentDescription = text)
             Spacer(Modifier.size(ButtonDefaults.IconSpacing))

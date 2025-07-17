@@ -272,17 +272,11 @@ class TimerViewModel(
         }
     }
 
-    fun pauseTimer() {
-        timerJob?.cancel()
-        _isRunning.value = false
-    }
-
-    fun resetTimer() {
+    fun stopTimer() {
         timerJob?.cancel()
         _isRunning.value = false
         _timerText.value = "00:00"
         _currentRep.value = 0
-        _totalReps.value = 0
         startTime = 0L
     }
 
