@@ -1,6 +1,8 @@
 package com.example.convictiontimer
 
 import android.app.Application
+import android.content.Context
+import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.BufferedReader
@@ -9,6 +11,8 @@ import java.io.InputStreamReader
 class TimerRepository(private val application: Application) {
 
     private var exercises: List<Exercise> = emptyList()
+    private val sharedPreferences = application.getSharedPreferences("user_progress", Context.MODE_PRIVATE)
+    private val gson = Gson()
 
     suspend fun loadExercises() {
         // Avoid reloading data if it's already there
@@ -63,5 +67,15 @@ class TimerRepository(private val application: Application) {
         return exercises.find {
             it.category == category && it.step.toString() == step && it.name == exerciseName && it.level == level
         }?.totalReps ?: 0
+    }
+
+    fun saveCategorySelectionState(category: String, state: CategorySelectionState) {
+        val json = gson.toJson(state)
+        sharedPreferences.edit().putString("selection_state_$category", json).apply()
+    }
+
+    fun getCategorySelectionState(category: String): CategorySelectionState? {
+        val json = sharedPreferences.getString("selection_state_$category", null)
+        return gson.fromJson(json, CategorySelectionState::class.java)
     }
 }

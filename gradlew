@@ -93,7 +93,7 @@ if [ -z "$JAVA_HOME" ] ; then
         if [ -d "/opt/homebrew/opt/openjdk" ] ; then
             JAVA_HOME="/opt/homebrew/opt/openjdk"
         fi
-    }
+    fi
 fi
 
 # For Cygwin, switch paths to Windows format before running java

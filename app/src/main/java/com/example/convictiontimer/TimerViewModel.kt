@@ -68,8 +68,7 @@ class TimerViewModel(
     private val _selectedLevel = MutableStateFlow("")
     val selectedLevel: StateFlow<String> = _selectedLevel.asStateFlow()
 
-    // Map to store selected step and level for each category
-    private val _categorySelectionStates = mutableMapOf<String, CategorySelectionState>()
+    
 
     init {
         tts = TextToSpeech(getApplication(), this)
@@ -108,7 +107,7 @@ class TimerViewModel(
         val steps = repository.getStepsForCategory(category)
         _steps.value = steps
 
-        val savedState = _categorySelectionStates[category]
+        val savedState = repository.getCategorySelectionState(category)
 
         if (steps.isNotEmpty()) {
             val stepToSelect = savedState?.selectedStep ?: steps.first()
@@ -132,7 +131,7 @@ class TimerViewModel(
         if (exerciseName.isNotEmpty()) {
             val levels = repository.getLevelsForExercise(_selectedCategory.value, step, exerciseName)
             _levels.value = levels
-            val savedState = _categorySelectionStates[_selectedCategory.value]
+            val savedState = repository.getCategorySelectionState(_selectedCategory.value)
             if (levels.isNotEmpty()) {
                 val levelToSelect = savedState?.selectedLevel ?: levels.first()
                 onLevelSelected(levelToSelect)
@@ -143,9 +142,12 @@ class TimerViewModel(
             _totalReps.value = 0
         }
         // Save the current selection for the category
-        _categorySelectionStates[_selectedCategory.value] = CategorySelectionState(
-            selectedStep = _selectedStep.value,
-            selectedLevel = _selectedLevel.value
+        repository.saveCategorySelectionState(
+            _selectedCategory.value,
+            CategorySelectionState(
+                selectedStep = _selectedStep.value,
+                selectedLevel = _selectedLevel.value
+            )
         )
     }
 
@@ -156,9 +158,12 @@ class TimerViewModel(
         _selectedLevel.value = ""
         _totalReps.value = 0
         // Save the current selection for the category
-        _categorySelectionStates[_selectedCategory.value] = CategorySelectionState(
-            selectedStep = _selectedStep.value,
-            selectedLevel = _selectedLevel.value
+        repository.saveCategorySelectionState(
+            _selectedCategory.value,
+            CategorySelectionState(
+                selectedStep = _selectedStep.value,
+                selectedLevel = _selectedLevel.value
+            )
         )
     }
 
@@ -167,9 +172,12 @@ class TimerViewModel(
         val totalReps = repository.getTotalRepsForLevel(_selectedCategory.value, _selectedStep.value, _selectedExercise.value, level)
         _totalReps.value = totalReps
         // Save the current selection for the category
-        _categorySelectionStates[_selectedCategory.value] = CategorySelectionState(
-            selectedStep = _selectedStep.value,
-            selectedLevel = _selectedLevel.value
+        repository.saveCategorySelectionState(
+            _selectedCategory.value,
+            CategorySelectionState(
+                selectedStep = _selectedStep.value,
+                selectedLevel = _selectedLevel.value
+            )
         )
     }
 
