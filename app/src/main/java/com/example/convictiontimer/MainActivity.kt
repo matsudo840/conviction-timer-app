@@ -106,11 +106,19 @@ fun ExerciseSelectionCard(timerViewModel: TimerViewModel) {
         Column(modifier = Modifier.padding(16.dp)) {
             ExerciseSelection(timerViewModel = timerViewModel)
             Spacer(modifier = Modifier.height(24.dp))
-            RepsAdjustmentControls(
-                totalReps = totalReps,
-                onIncrement = { timerViewModel.incrementTotalReps() },
-                onDecrement = { timerViewModel.decrementTotalReps() }
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceAround,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                RepsAdjustmentControls(
+                    totalReps = totalReps,
+                    onIncrement = { timerViewModel.incrementTotalReps() },
+                    onDecrement = { timerViewModel.decrementTotalReps() },
+                    modifier = Modifier.weight(0.7f)
+                )
+                SetsDisplay(timerViewModel = timerViewModel, modifier = Modifier.weight(0.3f))
+            }
         }
     }
 }
@@ -221,16 +229,17 @@ fun TimerDisplay(timerText: String, currentRep: Int) {
         modifier = Modifier.padding(vertical = 16.dp)
     ) {
         Text(
-            text = timerText,
+            text = "Rep: $currentRep",
             style = MaterialTheme.typography.displayLarge,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.primary
+            color = MaterialTheme.colorScheme.secondary
         )
         Spacer(modifier = Modifier.height(8.dp))
         Text(
-            text = "Rep: $currentRep",
+            text = timerText,
             style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.secondary
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.primary
         )
     }
 }
@@ -239,36 +248,38 @@ fun TimerDisplay(timerText: String, currentRep: Int) {
 fun RepsAdjustmentControls(
     totalReps: Int,
     onIncrement: () -> Unit,
-    onDecrement: () -> Unit
+    onDecrement: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val haptic = LocalHapticFeedback.current
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center,
-        modifier = Modifier.fillMaxWidth()
+        modifier = modifier
     ) {
         FilledTonalIconButton(
             onClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 onDecrement()
             },
-            modifier = Modifier.size(56.dp),
+            modifier = Modifier.size(36.dp),
             shape = CircleShape,
             enabled = (totalReps > 0)
         ) {
             Icon(
                 Icons.Filled.Remove,
                 contentDescription = "回数を減らす",
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
 
-        Spacer(modifier = Modifier.width(24.dp))
+        Spacer(modifier = Modifier.width(8.dp))
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.width(100.dp)
+            modifier = Modifier.weight(1f)
         ) {
             Text(
                 text = "Target Reps",
@@ -276,27 +287,47 @@ fun RepsAdjustmentControls(
             )
             Text(
                 text = totalReps.toString(),
-                style = MaterialTheme.typography.displaySmall,
+                style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
         }
 
-        Spacer(modifier = Modifier.width(24.dp))
+        Spacer(modifier = Modifier.width(8.dp))
 
-        FilledIconButton(
+        FilledTonalIconButton(
             onClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 onIncrement()
             },
-            modifier = Modifier.size(56.dp),
+            modifier = Modifier.size(36.dp),
             shape = CircleShape
         ) {
             Icon(
                 Icons.Filled.Add,
                 contentDescription = "回数を増やす",
-                modifier = Modifier.size(32.dp)
+                modifier = Modifier.size(20.dp),
+                tint = MaterialTheme.colorScheme.onPrimaryContainer
             )
         }
+    }
+}
+
+@Composable
+fun SetsDisplay(timerViewModel: TimerViewModel, modifier: Modifier = Modifier) {
+    val sets by timerViewModel.sets.collectAsState()
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Text(
+            text = "Sets",
+            style = MaterialTheme.typography.titleMedium
+        )
+        Text(
+            text = sets.toString(),
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
     }
 }
 

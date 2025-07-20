@@ -68,6 +68,9 @@ class TimerViewModel(
     private val _selectedLevel = MutableStateFlow("")
     val selectedLevel: StateFlow<String> = _selectedLevel.asStateFlow()
 
+    private val _sets = MutableStateFlow(0)
+    val sets: StateFlow<Int> = _sets.asStateFlow()
+
     
 
     init {
@@ -171,6 +174,8 @@ class TimerViewModel(
         _selectedLevel.value = level
         val totalReps = repository.getTotalRepsForLevel(_selectedCategory.value, _selectedStep.value, _selectedExercise.value, level)
         _totalReps.value = totalReps
+        val sets = repository.getSetsForLevel(_selectedCategory.value, _selectedStep.value, _selectedExercise.value, level)
+        _sets.value = sets
         // Save the current selection for the category
         repository.saveCategorySelectionState(
             _selectedCategory.value,

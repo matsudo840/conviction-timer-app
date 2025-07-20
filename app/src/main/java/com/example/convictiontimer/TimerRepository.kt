@@ -69,6 +69,12 @@ class TimerRepository(private val application: Application) {
         }?.totalReps ?: 0
     }
 
+    fun getSetsForLevel(category: String, step: String, exerciseName: String, level: String): Int {
+        return exercises.find {
+            it.category == category && it.step.toString() == step && it.name == exerciseName && it.level == level
+        }?.sets ?: 0
+    }
+
     fun saveCategorySelectionState(category: String, state: CategorySelectionState) {
         val json = gson.toJson(state)
         sharedPreferences.edit().putString("selection_state_$category", json).apply()
