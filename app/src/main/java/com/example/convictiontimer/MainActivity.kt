@@ -253,61 +253,56 @@ fun RepsAdjustmentControls(
 ) {
     val haptic = LocalHapticFeedback.current
 
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
     ) {
-        FilledTonalIconButton(
-            onClick = {
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                onDecrement()
-            },
-            modifier = Modifier.size(36.dp),
-            shape = CircleShape,
-            enabled = (totalReps > 0)
+        Text(
+            text = "Target Reps",
+            style = MaterialTheme.typography.titleMedium
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            Icon(
-                Icons.Filled.Remove,
-                contentDescription = "回数を減らす",
-                modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.onPrimaryContainer
-            )
-        }
+            FilledTonalIconButton(
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onDecrement()
+                },
+                modifier = Modifier.size(36.dp),
+                shape = CircleShape,
+                enabled = (totalReps > 0)
+            ) {
+                Icon(
+                    Icons.Filled.Remove,
+                    contentDescription = "回数を減らす",
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
 
-        Spacer(modifier = Modifier.width(8.dp))
-
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.weight(1f)
-        ) {
-            Text(
-                text = "Target Reps",
-                style = MaterialTheme.typography.titleMedium
-            )
             Text(
                 text = totalReps.toString(),
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold
             )
-        }
 
-        Spacer(modifier = Modifier.width(8.dp))
-
-        FilledTonalIconButton(
-            onClick = {
-                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                onIncrement()
-            },
-            modifier = Modifier.size(36.dp),
-            shape = CircleShape
-        ) {
-            Icon(
-                Icons.Filled.Add,
-                contentDescription = "回数を増やす",
-                modifier = Modifier.size(20.dp),
-                tint = MaterialTheme.colorScheme.onPrimaryContainer
-            )
+            FilledTonalIconButton(
+                onClick = {
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    onIncrement()
+                },
+                modifier = Modifier.size(36.dp),
+                shape = CircleShape
+            ) {
+                Icon(
+                    Icons.Filled.Add,
+                    contentDescription = "回数を増やす",
+                    modifier = Modifier.size(20.dp),
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
         }
     }
 }
