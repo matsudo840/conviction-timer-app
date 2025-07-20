@@ -1,100 +1,102 @@
 # Application Specifications
 
-This document provides a detailed breakdown of the Conviction Timer application's behavior and internal logic.
+This document provides a detailed breakdown of the Conviction Timer application's features, behavior, and internal logic.
 
-## 1. User Interface and Controls
+## 1. Overview
 
-The user interface is designed for simplicity and ease of use during a workout.
+The Conviction Timer is a specialized tool for bodyweight strength training. Its primary purpose is to guide the user through repetitions at a fixed, slow pace using audio cues, eliminating the need for manual counting or a stopwatch. The application is built around a 6-second repetition cycle.
 
-- **Exercise Selection Card:** A card at the top of the screen containing all controls for selecting an exercise.
-    - **Category:** A dropdown to select the exercise category.
-    - **Step:** A set of tabs to select the exercise step.
-    - **Level:** A set of tabs to select the exercise level.
-    - **Target Reps:** A display and controls (`+`/`-` buttons) for the target number of repetitions. This is located within the card, below the level selection.
-- **Timer Display:** Shows the elapsed time in `MM:SS` format and the current repetition count.
-- **Action Buttons:**
-    - **`START` Button:** Begins the timer and the workout sequence.
-    - **`PAUSE` Button:** Pauses the timer and audio. Pressing it again resumes the workout.
-    - **`RESET` Button:** Stops the timer, resets the repetition count to 0, and clears the target reps setting.
+## 2. User Interface (UI)
 
-## 2. Workout Flow
+The UI is designed for simplicity and minimal interaction during a workout.
 
-This section describes the step-by-step user experience.
+-   **Exercise Selection Card:** A card at the top of the screen that houses all controls for selecting a workout routine.
+    -   **Category:** A dropdown menu to select the main exercise group (e.g., "Push-up", "Squat").
+    -   **Step:** A set of tabs to select the specific exercise progression.
+    -   **Level:** A set of tabs to select the difficulty (e.g., "Beginner", "Intermediate").
+    -   **Target Reps:** A display showing the number of repetitions for the selected level, with `+` and `-` buttons for manual adjustment.
+    -   **Sets:** A display showing the number of sets for the selected routine.
+-   **Timer Display:** A central text element showing the elapsed time in `MM:SS` format and the current repetition count.
+-   **Control Buttons:**
+    -   **`START` / `STOP`:** A single button to begin or end the timer sequence.
 
-1.  **Initial State:**
-    - The user opens the app.
-    - The app automatically loads the first exercise from `res/raw/exercises.csv`.
-    - The **Category**, **Step**, **Level**, and **Target Reps** are pre-populated with the data from that first exercise.
-    - The timer displays "00:00" and the rep counter shows "0."
+## 3. Core Logic & State Management
 
-2.  **Setup:**
-    - The user can either proceed with the default exercise or select a different one using the controls in the Exercise Selection Card.
-    - The user can also manually adjust the **Target Reps** using the `+` and `-` buttons.
+All business logic is centralized in the `TimerViewModel` to create a reactive and maintainable architecture.
 
-3.  **Starting the Workout:**
-    - The user presses the **START** button.
-    - The timer begins, and a "Ready" voice prompt is played.
+### 3.1. ViewModel
 
-3.  **Performing Repetitions:**
-    - The app guides the user through a 6-second cycle for each repetition, accompanied by audio cues.
-    - At the beginning of each new repetition, the rep counter on the screen updates, and the number is announced aloud (e.g., "One," "Two").
+The `TimerViewModel` is responsible for:
+-   Managing the timer's state (`running`, `paused`, `stopped`).
+-   Holding and updating UI-related data (timer text, rep count, selected exercise).
+-   Loading exercise data from the `TimerRepository`.
+-   Handling all user interactions (starting/stopping the timer, selecting exercises).
+-   Controlling audio output (`TextToSpeech` and `SoundPool`).
 
-4.  **Pausing and Resuming:**
-    - The user can press the **PAUSE** button at any time to halt the timer and audio.
-    - Pressing the button again (it will now read **RESUME**) continues the workout from where it was paused.
+### 3.2. Data Flow
 
-5.  **Completion:**
-    - Once the target number of reps is reached, the timer stops automatically.
-    - The screen displays the message "Finish!"
-    - A "Finish" voice prompt is played.
+1.  On initialization, `TimerViewModel` requests `TimerRepository` to load exercise data.
+2.  `TimerRepository` reads the `res/raw/exercises.csv` file into a list of `Exercise` data objects.
+3.  The ViewModel exposes this data to the UI through `StateFlow` and `LiveData`.
+4.  User selections in the UI (e.g., choosing a category) trigger methods in the ViewModel, which then filters the exercise list and updates the UI state accordingly.
 
-6.  **Resetting:**
-    - The user can press the **RESET** button at any time to end the current session and return the app to its initial state.
+### 3.3. State Management
 
-## 3. Exercise Selection Flow
+The application uses a combination of `StateFlow` and `LiveData` to manage state:
 
-In addition to manually setting the target reps, the user can select a pre-defined exercise to automatically set the target repetitions.
+-   **`timerText`, `currentRep`, `isRunning`:** Exposed as `LiveData` for observing simple, lifecycle-aware UI updates.
+-   **Exercise Data (`categories`, `steps`, `levels`, etc.):** Exposed as `StateFlow` to handle streams of data and more complex state transformations related to exercise selection.
 
-1.  **Data Source:**
-    - Exercise data is loaded from the `res/raw/exercises.csv` file included in the application.
-    - This CSV file contains columns for `category`, `step`, `name`, `level`, `sets`, and `targetReps`.
+### 3.4. Exercise Selection Logic
 
-2.  **Selection Process:**
-    - The **Category**, **Step**, and **Level** controls are always visible.
-    - The user selects a **Category** from a dropdown list.
-    - Based on the chosen category, the available **Steps** are updated.
-    - Upon selecting a step, the **Exercise Name** is automatically determined and displayed.
-    - The available **Levels** for that exercise are then shown.
-    - Once the user selects a **Level**, the **Target Reps** field is automatically populated with the value from the CSV data.
+The selection controls are cascaded. The choice in one control filters the options available in the next:
 
-## 4. Timer and Audio Cue Logic
+1.  **Select Category:** Updates the list of available `Steps`.
+2.  **Select Step:** Determines the `Exercise Name` and updates the list of available `Levels`.
+3.  **Select Level:** Automatically populates the `Target Reps` and `Sets` from the corresponding data in the CSV file.
 
-All timing and audio events are managed by the `TimerViewModel`.
+### 3.5. State Persistence
 
-### Timer Sequence (6-Second Cycle)
+To enhance user experience, the app remembers the user's last selected `step` and `level` for each **category**.
+-   This is achieved using `SharedPreferences`.
+-   When a user selects a step or level, the `TimerViewModel` saves a `CategorySelectionState` object (containing the selected step and level) to storage, keyed by the category name.
+-   When the user returns to a category, the ViewModel retrieves this saved state and automatically applies the previous selections.
 
-The core of the app is a 6-second timer that dictates the pace of each repetition. Here is the sequence of events, starting from when the user presses **START**:
+## 4. Timer and Audio Sequence
 
-| Elapsed Time | On-Screen Rep Count | Voice Prompt      | Sound Effect      |
-| :----------- | :------------------ | :---------------- | :---------------- |
-| **1s**       | 0                   | "Ready"           | -                 |
-| **2s**       | 0                   | -                 | Interval Sound    |
-| **4s**       | 0                   | -                 | Interval Sound    |
-| **7s**       | 1                   | "One"             | Rep Count Sound   |
-| **8s**       | 1                   | -                 | Interval Sound    |
-| **10s**      | 1                   | -                 | Interval Sound    |
-| **13s**      | 2                   | "Two"             | Rep Count Sound   |
-| ...          | ...                 | ...               | ...               |
+### 4.1. 6-Second Repetition Cycle
 
-- **Repetition Duration:** Each rep takes exactly **6 seconds**.
-- **Voice Prompts:** Managed by Android's `TextToSpeech` engine.
-- **Sound Effects:** Short beeps (`count.mp3`, `interval.mp3`) are played using `SoundPool` for low-latency audio feedback.
+The core of the app is a precise 6-second timer loop for each repetition. The sequence begins after the user presses `START`.
 
-### State Management
+| Elapsed Time (Seconds) | On-Screen Rep Count | Voice Prompt (TTS) | Sound Effect (SoundPool) |
+| :--- | :--- | :--- | :--- |
+| 1 | 0 | "Ready" | - |
+| 2 | 0 | - | Interval Sound |
+| 4 | 0 | - | Interval Sound |
+| 7 | 1 | "One" | Rep Count Sound |
+| 8 | 1 | - | Interval Sound |
+| 10 | 1 | - | Interval Sound |
+| 13 | 2 | "Two" | Rep Count Sound |
+| ... | ... | ... | ... |
 
-The `TimerViewModel` uses `StateFlow` and `LiveData` to expose the following states to the UI, ensuring the interface is always in sync with the timer's logic:
+-   **Completion:** When the `currentRep` reaches the `targetReps`, the timer stops, a "Finish!" message is displayed, and a "Finish" voice prompt is played.
 
-- **`timerText`:** The formatted time string (e.g., "00:07").
-- **`currentRep`:** The current repetition number.
-- **`isRunning`:** A boolean indicating if the timer is active.
-- **`targetReps`:** The target number of repetitions for the session.
+### 4.2. Audio Output
+
+The app uses two different Android APIs for audio feedback, chosen for their specific strengths:
+
+-   **`TextToSpeech` (TTS):** Used for voice prompts ("Ready", "One", "Two", "Finish"). Ideal for speaking dynamic text.
+-   **`SoundPool`:** Used for low-latency sound effects (`count.mp3`, `interval.mp3`). It's optimized for playing short, frequently used audio clips with minimal delay.
+
+## 5. Data Source
+
+All workout routines are defined in a single CSV file.
+
+-   **File Path:** `app/src/main/res/raw/exercises.csv`
+-   **Structure:** The file contains the following columns:
+    -   `Category`: The main exercise group (e.g., `Push-up`).
+    -   `Step`: The progression number within the category (e.g., `1`, `2`).
+    -   `Exercise`: The specific name of the exercise (e.g., `Wall Push-ups`).
+    -   `Level`: The difficulty level (`Beginner`, `Intermediate`, `Advanced`).
+    -   `Reps`: The target number of repetitions for that level.
+    -   `Sets`: The recommended number of sets for that level.
