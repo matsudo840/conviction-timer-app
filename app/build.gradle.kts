@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.convictiontimer"
+    namespace = "com.example.convicttimer"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.convictiontimer"
+        applicationId = "com.example.convicttimer"
         minSdk = 26
         targetSdk = 34
         versionCode = 1

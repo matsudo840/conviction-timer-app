@@ -1,4 +1,4 @@
-package com.example.convictiontimer
+package com.example.convicttimer
 
 data class Exercise(
     val category: String,

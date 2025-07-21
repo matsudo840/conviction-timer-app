@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "ConvictionTimerApp"
+rootProject.name = "Convict Timer"
 include(":app")

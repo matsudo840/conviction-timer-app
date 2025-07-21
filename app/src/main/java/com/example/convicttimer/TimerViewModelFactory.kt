@@ -1,4 +1,4 @@
-package com.example.convictiontimer
+package com.example.convicttimer
 
 import android.app.Application
 import androidx.lifecycle.ViewModel

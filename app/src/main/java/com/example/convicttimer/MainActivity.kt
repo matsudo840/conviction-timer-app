@@ -1,4 +1,4 @@
-package com.example.convictiontimer
+package com.example.convicttimer
 
 import android.app.Application
 import android.os.Bundle
@@ -18,17 +18,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.convictiontimer.ui.theme.ConvictionTimerAppTheme
+import com.example.convicttimer.ui.theme.ConvictTimerTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            ConvictionTimerAppTheme {
+            ConvictTimerTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
@@ -53,7 +54,7 @@ fun ConvictionTimerScreen(timerViewModel: TimerViewModel = viewModel(factory = T
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Conviction Timer") },
+                title = { Text(stringResource(R.string.app_name)) },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -355,7 +356,7 @@ fun TimerControls(
 @Preview(showBackground = true)
 @Composable
 fun PreviewConvictionTimerScreen() {
-    ConvictionTimerAppTheme {
+    ConvictTimerTheme {
         ConvictionTimerScreen()
     }
 }
