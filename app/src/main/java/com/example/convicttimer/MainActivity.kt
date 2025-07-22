@@ -23,7 +23,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.convicttimer.ui.theme.ConvictTimerTheme
+
+import androidx.navigation.compose.currentBackStackEntryAsState
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -34,7 +39,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    ConvictionTimerScreen()
+                    MainScreen()
                 }
             }
         }
@@ -43,13 +48,12 @@ class MainActivity : ComponentActivity() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ConvictionTimerScreen(timerViewModel: TimerViewModel = viewModel(factory = TimerViewModelFactory(
-    LocalContext.current.applicationContext as Application,
-    TimerRepository(LocalContext.current.applicationContext as Application)
-))) {
-    val timerText by timerViewModel.timerText.observeAsState("00:00")
-    val currentRep by timerViewModel.currentRep.observeAsState(0)
-    val isRunning by timerViewModel.isRunning.observeAsState(false)
+fun MainScreen() {
+    val navController = rememberNavController()
+    val timerViewModel: TimerViewModel = viewModel(factory = TimerViewModelFactory(
+        LocalContext.current.applicationContext as Application,
+        TimerRepository(LocalContext.current.applicationContext as Application)
+    ))
 
     Scaffold(
         topBar = {
@@ -60,38 +64,68 @@ fun ConvictionTimerScreen(timerViewModel: TimerViewModel = viewModel(factory = T
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             )
+        },
+        bottomBar = {
+            val navBackStackEntry by navController.currentBackStackEntryAsState()
+            val currentDestination = navBackStackEntry?.destination
+
+            NavigationBar {
+                NavigationBarItem(
+                    icon = { Icon(Icons.Filled.Timer, contentDescription = "Timer") },
+                    label = { Text("Timer") },
+                    selected = currentDestination?.route == "timer",
+                    onClick = { navController.navigate("timer") }
+                )
+                NavigationBarItem(
+                    icon = { Icon(Icons.Filled.List, contentDescription = "Log") },
+                    label = { Text("Log") },
+                    selected = currentDestination?.route == "log",
+                    onClick = { navController.navigate("log") }
+                )
+            }
         }
     ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Spacer to push content down a bit from the top bar
-            Spacer(modifier = Modifier.height(16.dp))
-
-            ExerciseSelectionCard(timerViewModel = timerViewModel)
-
-            // Vertically center the timer display
-            Box(
-                modifier = Modifier.weight(1f),
-                contentAlignment = Alignment.Center
-            ) {
-                TimerDisplay(timerText = timerText, currentRep = currentRep)
-            }
-
-            TimerControls(
-                isRunning = isRunning,
-                onStartStop = {
-                    if (isRunning) timerViewModel.stopTimer() else timerViewModel.startTimer()
-                }
-            )
-
-            // Spacer at the bottom for padding
-            Spacer(modifier = Modifier.height(24.dp))
+        NavHost(navController = navController, startDestination = "timer", modifier = Modifier.padding(paddingValues)) {
+            composable("timer") { ConvictionTimerScreen(timerViewModel = timerViewModel) }
+            composable("log") { ExerciseLogScreen(timerViewModel = timerViewModel) }
         }
+    }
+}
+
+@Composable
+fun ConvictionTimerScreen(timerViewModel: TimerViewModel) {
+    val timerText by timerViewModel.timerText.observeAsState("00:00")
+    val currentRep by timerViewModel.currentRep.observeAsState(0)
+    val isRunning by timerViewModel.isRunning.observeAsState(false)
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Spacer to push content down a bit from the top bar
+        Spacer(modifier = Modifier.height(16.dp))
+
+        ExerciseSelectionCard(timerViewModel = timerViewModel)
+
+        // Vertically center the timer display
+        Box(
+            modifier = Modifier.weight(1f),
+            contentAlignment = Alignment.Center
+        ) {
+            TimerDisplay(timerText = timerText, currentRep = currentRep)
+        }
+
+        TimerControls(
+            isRunning = isRunning,
+            onStartStop = {
+                if (isRunning) timerViewModel.stopTimer() else timerViewModel.startTimer()
+            }
+        )
+
+        // Spacer at the bottom for padding
+        Spacer(modifier = Modifier.height(24.dp))
     }
 }
 
@@ -357,6 +391,6 @@ fun TimerControls(
 @Composable
 fun PreviewConvictionTimerScreen() {
     ConvictTimerTheme {
-        ConvictionTimerScreen()
+        MainScreen()
     }
 }

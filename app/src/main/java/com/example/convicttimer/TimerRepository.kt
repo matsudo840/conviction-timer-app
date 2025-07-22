@@ -2,6 +2,7 @@ package com.example.convicttimer
 
 import android.app.Application
 import android.content.Context
+import android.util.Log
 import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -23,24 +24,28 @@ class TimerRepository(private val application: Application) {
         if (exercises.isNotEmpty()) return
 
         withContext(Dispatchers.IO) {
-            val exerciseList = mutableListOf<Exercise>()
-            val inputStream = application.resources.openRawResource(R.raw.exercises)
-            val reader = BufferedReader(InputStreamReader(inputStream))
-            reader.readLine() // Skip CSV header
-            var line: String?
-            while (reader.readLine().also { line = it } != null) {
-                val tokens = line!!.split(",")
-                val exercise = Exercise(
-                    category = tokens[0],
-                    step = tokens[1].toInt(),
-                    name = tokens[2],
-                    level = tokens[3],
-                    sets = tokens[5].toInt(),
-                    totalReps = tokens[4].toInt()
-                )
-                exerciseList.add(exercise)
+            try {
+                val exerciseList = mutableListOf<Exercise>()
+                val inputStream = application.resources.openRawResource(R.raw.exercises)
+                val reader = BufferedReader(InputStreamReader(inputStream))
+                reader.readLine() // Skip CSV header
+                var line: String?
+                while (reader.readLine().also { line = it } != null) {
+                    val tokens = line!!.split(",")
+                    val exercise = Exercise(
+                        category = tokens[0],
+                        step = tokens[1].toInt(),
+                        name = tokens[2],
+                        level = tokens[3],
+                        sets = tokens[5].toInt(),
+                        totalReps = tokens[4].toInt()
+                    )
+                    exerciseList.add(exercise)
+                }
+                exercises = exerciseList
+            } catch (e: Exception) {
+                Log.e("TimerRepository", "Error loading exercises: ${e.message}")
             }
-            exercises = exerciseList
         }
     }
 
@@ -91,15 +96,54 @@ class TimerRepository(private val application: Application) {
 
     suspend fun saveTrainingLog(category: String, step: Int, reps: Int) {
         withContext(Dispatchers.IO) {
-            val file = File(application.filesDir, "training_log.csv")
-            val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
-            val currentDate = sdf.format(Date())
-            val logLine = currentDate + "," + category + "," + step + "," + reps + "\n"
+            try {
+                val file = File(application.filesDir, "training_log.csv")
+                val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                val currentDate = sdf.format(Date())
+                val logLine = "$currentDate,$category,$step,$reps\n"
 
-            if (!file.exists()) {
-                file.writeText("Date,Category,Step,Reps\n")
+                if (!file.exists()) {
+                    file.writeText("Date,Category,Step,Reps\n")
+                }
+                file.appendText(logLine)
+                Log.d("TimerRepository", "Saved training log: $logLine")
+            } catch (e: Exception) {
+                Log.e("TimerRepository", "Error saving training log: ${e.message}")
             }
-            file.appendText(logLine)
+        }
+    }
+
+    suspend fun loadTrainingLogs(): List<TrainingLog> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val file = File(application.filesDir, "training_log.csv")
+                if (!file.exists()) {
+                    Log.d("TimerRepository", "Training log file does not exist.")
+                    return@withContext emptyList<TrainingLog>()
+                }
+
+                val logList = mutableListOf<TrainingLog>()
+                val reader = BufferedReader(InputStreamReader(file.inputStream()))
+                reader.readLine() // Skip CSV header
+                var line: String?
+                while (reader.readLine().also { line = it } != null) {
+                    val tokens = line!!.split(",")
+                    if (tokens.size >= 4) {
+                        val log = TrainingLog(
+                            date = tokens[0],
+                            category = tokens[1],
+                            step = tokens[2],
+                            reps = tokens[3]
+                        )
+                        logList.add(log)
+                    }
+                }
+                Log.d("TimerRepository", "Loaded ${logList.size} training logs.")
+                logList
+            } catch (e: Exception) {
+                Log.e("TimerRepository", "Error loading training logs: ${e.message}")
+                emptyList<TrainingLog>()
+            }
         }
     }
 }

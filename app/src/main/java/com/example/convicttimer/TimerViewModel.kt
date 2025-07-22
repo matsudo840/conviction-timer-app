@@ -71,7 +71,11 @@ class TimerViewModel(
     private val _sets = MutableStateFlow(0)
     val sets: StateFlow<Int> = _sets.asStateFlow()
 
-    
+    private val _exercises = MutableStateFlow<List<Exercise>>(emptyList())
+    val exercises: StateFlow<List<Exercise>> = _exercises.asStateFlow()
+
+    private val _trainingLogs = MutableStateFlow<List<TrainingLog>>(emptyList())
+    val trainingLogs: StateFlow<List<TrainingLog>> = _trainingLogs.asStateFlow()
 
     init {
         tts = TextToSpeech(getApplication(), this)
@@ -95,6 +99,8 @@ class TimerViewModel(
     private fun loadInitialData() {
         viewModelScope.launch {
             repository.loadExercises()
+            _exercises.value = repository.getExercises()
+            _trainingLogs.value = repository.loadTrainingLogs()
             val categories = repository.getCategories()
             _categories.value = categories
 
@@ -289,6 +295,7 @@ class TimerViewModel(
                         _selectedStep.value.toInt(),
                         currentTotalReps
                     )
+                    _trainingLogs.value = repository.loadTrainingLogs()
                 }
             }
         }
@@ -297,6 +304,19 @@ class TimerViewModel(
     fun stopTimer() {
         timerJob?.cancel()
         _isRunning.value = false
+
+        val repsCompleted = (_currentRep.value ?: 0) - 1
+        if (repsCompleted >= 0) {
+            viewModelScope.launch {
+                repository.saveTrainingLog(
+                    _selectedCategory.value,
+                    _selectedStep.value.toInt(),
+                    repsCompleted
+                )
+                _trainingLogs.value = repository.loadTrainingLogs()
+            }
+        }
+
         _timerText.value = "00:00"
         _currentRep.value = 0
         startTime = 0L
