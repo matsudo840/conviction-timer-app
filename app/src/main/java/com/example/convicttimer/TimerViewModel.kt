@@ -281,6 +281,15 @@ class TimerViewModel(
                 _timerText.postValue("Finish!")
                 speak("Finish")
                 _isRunning.postValue(false)
+
+                // Save the training log
+                viewModelScope.launch {
+                    repository.saveTrainingLog(
+                        _selectedCategory.value,
+                        _selectedStep.value.toInt(),
+                        currentTotalReps
+                    )
+                }
             }
         }
     }

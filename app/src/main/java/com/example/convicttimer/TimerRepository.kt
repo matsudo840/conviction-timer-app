@@ -6,7 +6,11 @@ import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.BufferedReader
+import java.io.File
 import java.io.InputStreamReader
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class TimerRepository(private val application: Application) {
 
@@ -77,11 +81,25 @@ class TimerRepository(private val application: Application) {
 
     fun saveCategorySelectionState(category: String, state: CategorySelectionState) {
         val json = gson.toJson(state)
-        sharedPreferences.edit().putString("selection_state_$category", json).apply()
+        sharedPreferences.edit().putString("selection_state_" + category, json).apply()
     }
 
     fun getCategorySelectionState(category: String): CategorySelectionState? {
-        val json = sharedPreferences.getString("selection_state_$category", null)
+        val json = sharedPreferences.getString("selection_state_" + category, null)
         return gson.fromJson(json, CategorySelectionState::class.java)
+    }
+
+    suspend fun saveTrainingLog(category: String, step: Int, reps: Int) {
+        withContext(Dispatchers.IO) {
+            val file = File(application.filesDir, "training_log.csv")
+            val sdf = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+            val currentDate = sdf.format(Date())
+            val logLine = currentDate + "," + category + "," + step + "," + reps + "\n"
+
+            if (!file.exists()) {
+                file.writeText("Date,Category,Step,Reps\n")
+            }
+            file.appendText(logLine)
+        }
     }
 }
