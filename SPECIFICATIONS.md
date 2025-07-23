@@ -8,17 +8,29 @@ The Conviction Timer is a specialized tool for bodyweight strength training. Its
 
 ## 2. User Interface (UI)
 
-The UI is designed for simplicity and minimal interaction during a workout.
+The UI is designed for simplicity and minimal interaction during a workout. It consists of two main screens accessible via a bottom navigation bar.
+
+-   **Timer Screen:** The primary screen for selecting and performing exercises.
+-   **Log Screen:** A screen that displays a history of completed workouts.
+
+### 2.1. Timer Screen
 
 -   **Exercise Selection Card:** A card at the top of the screen that houses all controls for selecting a workout routine.
-    -   **Category:** A dropdown menu to select the main exercise group (e.g., "Push-up", "Squat").
-    -   **Step:** A set of tabs to select the specific exercise progression.
+    -   **Category:** A scrollable tab row (`ScrollableTabRow`) to select the main exercise group (e.g., "Push-up", "Squat").
+    -   **Step:** A scrollable tab row to select the specific exercise progression.
     -   **Level:** A set of tabs to select the difficulty (e.g., "Beginner", "Intermediate").
     -   **Target Reps:** A display showing the number of repetitions for the selected level, with `+` and `-` buttons for manual adjustment.
     -   **Sets:** A display showing the number of sets for the selected routine.
 -   **Timer Display:** A central text element showing the elapsed time in `MM:SS` format and the current repetition count.
 -   **Control Buttons:**
     -   **`START` / `STOP`:** A single button to begin or end the timer sequence.
+
+### 2.2. Log Screen
+
+-   **Workout History:** Displays a chronological list of all completed training sessions. Each entry shows:
+    -   Date
+    -   Exercise Category & Step
+    -   Number of Reps completed
 
 ## 3. Core Logic & State Management
 
@@ -68,18 +80,20 @@ To enhance user experience, the app remembers the user's last selected `step` an
 
 The core of the app is a precise 6-second timer loop for each repetition. The sequence begins after the user presses `START`.
 
-| Elapsed Time (Seconds) | On-Screen Rep Count | Voice Prompt (TTS) | Sound Effect (SoundPool) |
-| :--- | :--- | :--- | :--- |
-| 1 | 0 | "Ready" | - |
-| 2 | 0 | - | Interval Sound |
-| 4 | 0 | - | Interval Sound |
-| 7 | 1 | "One" | Rep Count Sound |
-| 8 | 1 | - | Interval Sound |
-| 10 | 1 | - | Interval Sound |
-| 13 | 2 | "Two" | Rep Count Sound |
-| ... | ... | ... | ... |
+| Elapsed Time (Seconds) | Second in Rep | On-Screen Rep Count | Voice Prompt (TTS) | Sound Effect (SoundPool) |
+| :--- | :--- | :--- | :--- | :--- |
+| 0 | 0 | 0 | "Ready" | Interval Sound |
+| 1 | 1 | 0 | - | Interval Sound |
+| 2 | 2 | 0 | - | Count Sound |
+| 3 | 3 | 0 | - | Interval Sound |
+| 4 | 4 | 0 | - | Interval Sound |
+| 5 | 5 | 0 | - | Count Sound |
+| 6 | 0 | 1 | "One" | Interval Sound |
+| 7 | 1 | 1 | - | Interval Sound |
+| 8 | 2 | 1 | - | Count Sound |
+| ... | ... | ... | ... | ... |
 
--   **Completion:** When the `currentRep` reaches the `targetReps`, the timer stops, a "Finish!" message is displayed, and a "Finish" voice prompt is played.
+-   **Completion:** When the `currentRep` reaches the `targetReps`, the timer stops, a "Finish!" message is displayed, and a "Finish" voice prompt is played. A log of the completed workout is then saved automatically.
 
 ### 4.2. Audio Output
 
