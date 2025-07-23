@@ -1,6 +1,10 @@
-# Conviction Timer App
+# Convict Timer App
 
 A simple timer designed to help you perform bodyweight exercise repetitions (reps) at a correct, consistent pace.
+
+## Your Daily Training Companion
+
+This app is your perfect partner for daily Convict training. It allows you to execute your daily workouts seamlessly, tracking your sets and reps so you can focus on what matters most: your form and strength. With your training log automatically saved, you can easily look back on your progress and stay motivated. While you'll learn the foundational knowledge and proper form from resources like the "Convict Conditioning" book or YouTube videos, this app takes over from there.
 
 ## Features
 
@@ -11,7 +15,7 @@ A simple timer designed to help you perform bodyweight exercise repetitions (rep
 
 ## Who Is This For?
 
-*   Individuals who want to maintain a slow, controlled pace for perfect form.
+*   Individuals who want to practice Convict Training on their own.
 *   Anyone looking to free themselves from stopwatches and mental counting.
 *   Users who want to track their workout history automatically.
 *   Users dedicated to maximizing the quality of their training.
