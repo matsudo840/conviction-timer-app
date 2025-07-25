@@ -322,6 +322,15 @@ class TimerViewModel(
         startTime = 0L
     }
 
+    fun updateLog(index: Int, log: TrainingLog) {
+        viewModelScope.launch {
+            val currentLogs = _trainingLogs.value.toMutableList()
+            currentLogs[index] = log
+            repository.updateAllTrainingLogs(currentLogs)
+            _trainingLogs.value = repository.loadTrainingLogs()
+        }
+    }
+
     // A single, simplified speak function
     private fun speak(text: String) {
         tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)

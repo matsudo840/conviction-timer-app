@@ -146,4 +146,18 @@ class TimerRepository(private val application: Application) {
             }
         }
     }
+
+    suspend fun updateAllTrainingLogs(logs: List<TrainingLog>) {
+        withContext(Dispatchers.IO) {
+            try {
+                val file = File(application.filesDir, "training_log.csv")
+                file.writeText("Date,Category,Step,Reps\n")
+                logs.forEach { log ->
+                    file.appendText("${log.date},${log.category},${log.step},${log.reps}\n")
+                }
+            } catch (e: Exception) {
+                Log.e("TimerRepository", "Error updating training logs: ${e.message}")
+            }
+        }
+    }
 }
