@@ -31,6 +31,7 @@ The UI is designed for simplicity and minimal interaction during a workout. It c
     -   Date
     -   Exercise Category & Step
     -   Number of Reps completed
+-   **Editing Mode:** A floating action button allows the user to enter an editing mode. In this mode, tapping on a log entry opens a dialog to modify the date, category, step, and reps.
 
 ## 3. Core Logic & State Management
 
@@ -57,7 +58,7 @@ The `TimerViewModel` is responsible for:
 The application uses a combination of `StateFlow` and `LiveData` to manage state:
 
 -   **`timerText`, `currentRep`, `isRunning`:** Exposed as `LiveData` for observing simple, lifecycle-aware UI updates.
--   **Exercise Data (`categories`, `steps`, `levels`, etc.):** Exposed as `StateFlow` to handle streams of data and more complex state transformations related to exercise selection.
+-   **Exercise Data (`categories`, `steps`, `levels`, etc.) and Training Logs:** Exposed as `StateFlow` to handle streams of data and more complex state transformations related to exercise selection and log updates.
 
 ### 3.4. Exercise Selection Logic
 

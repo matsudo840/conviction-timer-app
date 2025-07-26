@@ -11,6 +11,7 @@ This app is your perfect partner for daily Convict training. It allows you to ex
 *   **Paced Repetitions:** Guides you through a 6-second repetition cycle (e.g., 2 seconds down, 2-second hold, 2 seconds up) with clear audio cues.
 *   **Automatic Rep Counting:** Counts your reps aloud in English, allowing you to focus solely on your workout.
 *   **Training Log:** Automatically saves your completed workouts so you can track your progress.
+*   **Editable Logs:** Allows you to edit the date, category, step, and reps for each training log entry.
 *   **Simple Interface:** The screen features only the essential controls: set your target reps, start, and stop the timer.
 
 ## Who Is This For?
