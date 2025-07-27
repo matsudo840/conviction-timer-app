@@ -96,7 +96,7 @@ class TimerViewModel(
         loadInitialData()
     }
 
-    private fun loadInitialData() {
+    internal fun loadInitialData() {
         viewModelScope.launch {
             repository.loadExercises()
             _exercises.value = repository.getExercises()
