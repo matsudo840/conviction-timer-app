@@ -86,9 +86,7 @@ fun MainScreen() {
 
 @Composable
 fun ConvictionTimerScreen(timerViewModel: TimerViewModel) {
-    val timerText by timerViewModel.timerText.observeAsState("00:00")
-    val currentRep by timerViewModel.currentRep.observeAsState(0)
-    val isRunning by timerViewModel.isRunning.observeAsState(false)
+    val uiState by timerViewModel.uiState.collectAsState()
 
     Column(
         modifier = Modifier
@@ -106,13 +104,13 @@ fun ConvictionTimerScreen(timerViewModel: TimerViewModel) {
             modifier = Modifier.weight(1f),
             contentAlignment = Alignment.Center
         ) {
-            TimerDisplay(timerText = timerText, currentRep = currentRep)
+            TimerDisplay(timerText = uiState.time, currentRep = uiState.currentRep)
         }
 
         TimerControls(
-            isRunning = isRunning,
+            isRunning = uiState.isRunning,
             onStartStop = {
-                if (isRunning) timerViewModel.stopTimer() else timerViewModel.startTimer()
+                if (uiState.isRunning) timerViewModel.stopTimer() else timerViewModel.startTimer()
             }
         )
 
@@ -123,7 +121,7 @@ fun ConvictionTimerScreen(timerViewModel: TimerViewModel) {
 
 @Composable
 fun ExerciseSelectionCard(timerViewModel: TimerViewModel) {
-    val totalReps by timerViewModel.totalReps.collectAsState()
+    val uiState by timerViewModel.uiState.collectAsState()
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -139,7 +137,7 @@ fun ExerciseSelectionCard(timerViewModel: TimerViewModel) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 RepsAdjustmentControls(
-                    totalReps = totalReps,
+                    totalReps = uiState.totalReps,
                     onIncrement = { timerViewModel.incrementTotalReps() },
                     onDecrement = { timerViewModel.decrementTotalReps() },
                     modifier = Modifier.weight(0.7f)
@@ -152,51 +150,42 @@ fun ExerciseSelectionCard(timerViewModel: TimerViewModel) {
 
 @Composable
 fun ExerciseSelection(timerViewModel: TimerViewModel) {
-    val categories by timerViewModel.categories.collectAsState()
-    val selectedCategory by timerViewModel.selectedCategory.collectAsState()
-
-    val steps by timerViewModel.steps.collectAsState()
-    val selectedStep by timerViewModel.selectedStep.collectAsState()
-
-    val selectedExercise by timerViewModel.selectedExercise.collectAsState()
-
-    val levels by timerViewModel.levels.collectAsState()
-    val selectedLevel by timerViewModel.selectedLevel.collectAsState()
+    val uiState by timerViewModel.uiState.collectAsState()
 
     Column {
-        if (categories.isNotEmpty()) {
+        if (uiState.categories.isNotEmpty()) {
             SelectionRow(
                 label = "Category",
-                items = categories,
-                selectedValue = selectedCategory,
+                items = uiState.categories,
+                selectedValue = uiState.selectedCategory,
                 onValueSelected = { timerViewModel.onCategorySelected(it) }
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        if (steps.isNotEmpty()) {
+        if (uiState.steps.isNotEmpty()) {
             SelectionRow(
                 label = "Step",
-                items = steps,
-                selectedValue = selectedStep,
+                items = uiState.steps,
+                selectedValue = uiState.selectedStep,
                 onValueSelected = { timerViewModel.onStepSelected(it) }
             )
         }
 
-        if (selectedExercise.isNotEmpty()) {
+        if (uiState.selectedExercise.isNotEmpty()) {
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = "Exercise: $selectedExercise",
+                text = "Exercise: ${uiState.selectedExercise}",
                 style = MaterialTheme.typography.bodyLarge
             )
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        if (levels.isNotEmpty()) {
+        if (uiState.levels.isNotEmpty()) {
             SelectionRow(
                 label = "Level",
-                items = levels,
-                selectedValue = selectedLevel,
+                items = uiState.levels,
+                selectedValue = uiState.selectedLevel,
                 onValueSelected = { timerViewModel.onLevelSelected(it) },
                 scrollable = false
             )
@@ -336,7 +325,7 @@ fun RepsAdjustmentControls(
 
 @Composable
 fun SetsDisplay(timerViewModel: TimerViewModel, modifier: Modifier = Modifier) {
-    val sets by timerViewModel.sets.collectAsState()
+    val uiState by timerViewModel.uiState.collectAsState()
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier.fillMaxWidth()
@@ -346,7 +335,7 @@ fun SetsDisplay(timerViewModel: TimerViewModel, modifier: Modifier = Modifier) {
             style = MaterialTheme.typography.titleMedium
         )
         Text(
-            text = sets.toString(),
+            text = uiState.sets.toString(),
             style = MaterialTheme.typography.titleLarge,
             fontWeight = FontWeight.Bold
         )

@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun ExerciseLogScreen(timerViewModel: TimerViewModel) {
-    val trainingLogs by timerViewModel.trainingLogs.collectAsState()
+    val uiState by timerViewModel.uiState.collectAsState()
     var isEditingMode by remember { mutableStateOf(false) }
     var editingLog by remember { mutableStateOf<Pair<Int, TrainingLog>?>(null) }
 
@@ -53,7 +53,7 @@ fun ExerciseLogScreen(timerViewModel: TimerViewModel) {
                 .padding(16.dp)
         ) {
             LazyColumn {
-                itemsIndexed(trainingLogs) { index, log ->
+                itemsIndexed(uiState.trainingLogs) { index, log ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
