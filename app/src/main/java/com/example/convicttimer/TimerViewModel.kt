@@ -201,13 +201,13 @@ class TimerViewModel(
     fun startTimer() {
         if (_uiState.value.isRunning || _uiState.value.totalReps <= 0) return
 
-        _uiState.update { it.copy(isRunning = true, currentRep = 0) }
+        _uiState.update { it.copy(isRunning = true, currentRep = 0, time = "00:00") }
         startTime = System.currentTimeMillis()
 
         timerJob?.cancel()
         timerJob = viewModelScope.launch {
-            var elapsedSeconds = 0
             val totalDuration = (_uiState.value.totalReps + 1) * repetitionDurationSeconds
+            var elapsedSeconds = 0
 
             while (_uiState.value.isRunning && elapsedSeconds < totalDuration) {
                 val targetTime = startTime + (elapsedSeconds * 1000L)
@@ -218,55 +218,62 @@ class TimerViewModel(
 
                 if (!_uiState.value.isRunning) break
 
-                if (elapsedSeconds < repetitionDurationSeconds) {
-                    if (elapsedSeconds == 0) {
-                        _uiState.update { it.copy(time = "00:00") }
-                    }
-                } else {
-                    _uiState.update { it.copy(time = formatTime(elapsedSeconds - repetitionDurationSeconds + 1)) }
-                }
-
-                val secondInRep = elapsedSeconds % repetitionDurationSeconds
-
-                if (secondInRep == 0) { 
-                    val repCycleIndex = elapsedSeconds / repetitionDurationSeconds
-
-                    if (repCycleIndex == 0) {
-                        speak("Ready")
-                    } else {
-                        val repNumber = repCycleIndex
-                        _uiState.update { it.copy(currentRep = repNumber) }
-                        speak(repNumber.toString())
-                    }
-                }
-
-                when (secondInRep) {
-                    0, 1, 3, 4 -> playIntervalSound()
-                    2, 5 -> playCountSound()
-                }
+                updateTimerDisplay(elapsedSeconds)
+                handleRepetitions(elapsedSeconds)
 
                 elapsedSeconds++
             }
 
             if (_uiState.value.isRunning) {
-                val finalTargetTime = startTime + (totalDuration * 1000L)
-                val finalDelay = finalTargetTime - System.currentTimeMillis()
-                if (finalDelay > 0) {
-                    delay(finalDelay)
-                }
-
-                _uiState.update { it.copy(currentRep = _uiState.value.totalReps, time = "Finish!", isRunning = false) }
-                speak("Finish")
-
-                viewModelScope.launch {
-                    repository.saveTrainingLog(
-                        _uiState.value.selectedCategory,
-                        _uiState.value.selectedStep.toInt(),
-                        _uiState.value.totalReps
-                    )
-                    _uiState.update { it.copy(trainingLogs = repository.loadTrainingLogs()) }
-                }
+                handleTimerFinish(totalDuration)
             }
+        }
+    }
+
+    private fun updateTimerDisplay(elapsedSeconds: Int) {
+        if (elapsedSeconds >= repetitionDurationSeconds) {
+            _uiState.update { it.copy(time = formatTime(elapsedSeconds - repetitionDurationSeconds + 1)) }
+        }
+    }
+
+    private fun handleRepetitions(elapsedSeconds: Int) {
+        val secondInRep = elapsedSeconds % repetitionDurationSeconds
+        if (secondInRep == 0) {
+            val repCycleIndex = elapsedSeconds / repetitionDurationSeconds
+            if (repCycleIndex == 0) {
+                speak("Ready")
+            } else {
+                _uiState.update { it.copy(currentRep = repCycleIndex) }
+                speak(repCycleIndex.toString())
+            }
+        }
+
+        when (secondInRep) {
+            0, 1, 3, 4 -> playIntervalSound()
+            2, 5 -> playCountSound()
+        }
+    }
+
+    private suspend fun handleTimerFinish(totalDuration: Int) {
+        val finalTargetTime = startTime + (totalDuration * 1000L)
+        val finalDelay = finalTargetTime - System.currentTimeMillis()
+        if (finalDelay > 0) {
+            delay(finalDelay)
+        }
+
+        _uiState.update { it.copy(currentRep = _uiState.value.totalReps, time = "Finish!", isRunning = false) }
+        speak("Finish")
+        saveCompletedTrainingLog()
+    }
+
+    private fun saveCompletedTrainingLog() {
+        viewModelScope.launch {
+            repository.saveTrainingLog(
+                _uiState.value.selectedCategory,
+                _uiState.value.selectedStep.toInt(),
+                _uiState.value.totalReps
+            )
+            _uiState.update { it.copy(trainingLogs = repository.loadTrainingLogs()) }
         }
     }
 
@@ -274,7 +281,14 @@ class TimerViewModel(
         timerJob?.cancel()
         _uiState.update { it.copy(isRunning = false) }
 
-        val repsCompleted = (_uiState.value.currentRep) - 1
+        saveIncompleteTrainingLog()
+
+        _uiState.update { it.copy(time = "00:00", currentRep = 0) }
+        startTime = 0L
+    }
+
+    private fun saveIncompleteTrainingLog() {
+        val repsCompleted = _uiState.value.currentRep - 1
         if (repsCompleted >= 0) {
             viewModelScope.launch {
                 repository.saveTrainingLog(
@@ -285,9 +299,6 @@ class TimerViewModel(
                 _uiState.update { it.copy(trainingLogs = repository.loadTrainingLogs()) }
             }
         }
-
-        _uiState.update { it.copy(time = "00:00", currentRep = 0) }
-        startTime = 0L
     }
 
     fun updateLog(index: Int, log: TrainingLog) {
